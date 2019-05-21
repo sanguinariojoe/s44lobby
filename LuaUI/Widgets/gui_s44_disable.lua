@@ -5,7 +5,7 @@ function widget:GetInfo()
         author = "Jose Luis Cercos-Pita",
         date = "2019-05-20",
         license = "GPL v2",
-        layer = 9999,
+        layer = 99999999,
         experimental = false,
         enabled = true,
     }
@@ -41,16 +41,17 @@ local widgets = {
 }
 
 local unbinds = {
-    "f11",
+    -- "f11",
     "Shift+esc",
 }
 
 local comms = {
     "resbar 0",
     "console 0",
+    "tooltip 0",
 }
 
-function widget:Initialize()
+function disableUI()
     for _,widget in pairs(widgets) do
         Spring.SendCommands({"luaui disablewidget " .. widget})
     end
@@ -61,6 +62,20 @@ function widget:Initialize()
 
     for _,comm in pairs(comms) do
         Spring.SendCommands({comm})
+    end
+
+    -- Finally, remove the minimap
+    gl.SlaveMiniMap(true)    
+end
+
+function widget:Initialize()
+    disableUI()
+end
+
+function widget:GameFrame(n)
+    if n <= 1 then
+        -- A last try to remove some persistent widgets
+        disableUI()
     end
 end
 
