@@ -15,6 +15,7 @@ end
 -- complex syntax: https://springrts.com/wiki/Uikeys.txt
 
 local widgets = {
+    "Faction Change",
     "1944 Aircraft Selection Buttons",
     "1944 Build Indicators",
     "1944 Flag Income",
