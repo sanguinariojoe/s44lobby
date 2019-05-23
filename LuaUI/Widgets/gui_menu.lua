@@ -11,6 +11,10 @@ function widget:GetInfo()
     }
 end 
 
+local components = {
+    "main.lua",
+    "settings.lua",
+}
 
 function widget:Initialize()
     if not WG.Chili then
@@ -22,7 +26,17 @@ function widget:Initialize()
     Chili = WG.Chili
     Screen0 = Chili.Screen0
 
-    local main_win = VFS.Include("LuaUI/Widgets/gui_menu/main.lua")
-    main_win:setup(Chili, Screen0)
-    main_win:show()
+    for _, file in ipairs(components) do
+        VFS.Include("LuaUI/Widgets/gui_menu/" .. file, Chili, VFS.RAW_FIRST)
+    end
+
+    -- Setup the windows
+    local settings = Chili.SettingsWindow:New({
+        parent = Screen0,
+    })
+    local main = Chili.MainWindow:New({
+        parent = Screen0,
+    }, settings)
+    -- Fire up main window
+    main:Show()
 end

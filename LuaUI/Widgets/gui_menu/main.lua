@@ -1,39 +1,51 @@
-local main_window = {
-    win
+local Chili = WG.Chili
+
+MainWindow = Chili.Window:Inherit{
+    drawcontrolv2 = true
 }
-main_window.__index = main_window
 
-local function NotImplemented()
-    Spring.Log("Menu", "warning", "Calling non-implemented action")
+local this = MainWindow
+local inherited = this.inherited
+
+--//=============================================================================
+
+VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
+
+local function GoToSettings(self)
+    local win = TopLevelParent(self)
+    local child = win.settings_win
+    child:Show(win)
+    win:Hide()
 end
 
-local function Quit()
-    Spring.SendCommands({"QuitForce",})
-end
+--//=============================================================================
 
-function main_window:setup(Chili, parent)
-    -- Create the window
-    self.win = Chili.Window:New{
-        parent = Screen0,
-        x = '30%',
-        y = '10%',
-        width = '40%',
-        height = '80%',
-    }
+function this:New(obj, settings_win)
+    self.settings_win = settings_win
+
+    obj.x = obj.x or '30%'
+    obj.y = obj.y or '10%'
+    obj.minwidth = 320
+    obj.width = obj.width or '40%'
+    obj.minHeight = 64 * 4
+    obj.height = obj.height or '80%'
+
+    obj = inherited.New(self, obj)
+
     local logo = Chili.Image:New {
-        parent = self.win,
+        parent = obj,
         width = "100%",
         height = "15%",
         keepAspect = true,
         file = "LuaUI/Widgets/gui_menu/rsrc/S44-logo-vector.png",
     }
     local grid = Chili.Grid:New {
-        parent = self.win,
+        parent = obj,
         x = '0%',
         y = '15%',
         width = '100%',
         height = '85%',
-        rows = 5,
+        rows = 4,
         columns = 1,        
         padding = {5,5,5,5},
     }
@@ -42,46 +54,26 @@ function main_window:setup(Chili, parent)
         parent = grid,
         caption = "Multiplayer",
         backgroundColor = { 1, 1, 1, 1 },
-        font = { size = fontSize },
         OnMouseUp = { NotImplemented },
     }
     local WikiButton = Chili.Button:New {
         parent = grid,
         caption = "Units",
         backgroundColor = { 1, 1, 1, 1 },
-        font = { size = fontSize },
         OnMouseUp = { NotImplemented },
     }
     local ConfigButton = Chili.Button:New {
         parent = grid,
-        caption = "Configure",
+        caption = "Settings",
         backgroundColor = { 1, 1, 1, 1 },
-        font = { size = fontSize },
-        OnMouseUp = { NotImplemented },
+        OnMouseUp = { GoToSettings },
     }
     local QuitButton = Chili.Button:New {
         parent = grid,
         caption = "Exit",
         backgroundColor = { 1, 1, 1, 1 },
-        font = { size = fontSize },
         OnMouseUp = { Quit },
     }
-end
 
-function main_window:show()
-    if self.win == nil then
-        Spring.Log("Menu", "error", "Setup main window before showing it!")
-        return
-    end
-    self.win:Show()
+    return obj
 end
-
-function main_window:hide()
-    if self.win == nil then
-        Spring.Log("Menu", "error", "Setup main window before hiding it!")
-        return
-    end
-    self.win:Hide()
-end
-
-return main_window
