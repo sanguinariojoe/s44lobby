@@ -13,6 +13,111 @@ local RESOLUTIONS = {'800x600 (4:3)','1024x768 (4:3)','1152x864 (4:3)',
                      '1920x1080 (16:9)', '2048x768 (dual)', '2560x1024 (dual)',
                      '3200x1200 (dual)'}
 
+local QUALITY_KEYS = {'very low', 'low', 'medium', 'high', 'very high'}  -- To ensure the order
+local QUALITIES = {['very low']  = {["DepthBufferBits"]=16,
+                                    ["ReflectiveWater"]=0,
+                                    ["Shadows"]=0,
+                                    ["3DTrees"]=0,
+                                    ["AdvSky"]=0,
+                                    ["DynamicSky"]=0,
+                                    ["SmoothPoints"]=0,
+                                    ["SmoothLines"]=0,
+                                    ["FSAA"]=0,
+                                    ["FSAALevel"]=0,
+                                    ["AdvUnitShading"]=0,
+                                    ["AllowDeferredMapRendering"]=0},
+                   ['low']       = {["DepthBufferBits"]=16,
+                                    ["ReflectiveWater"]=0,
+                                    ["Shadows"]=0,
+                                    ["3DTrees"]=1,
+                                    ["AdvSky"]=0,
+                                    ["DynamicSky"]=0,
+                                    ["SmoothPoints"]=0,
+                                    ["SmoothLines"]=0,
+                                    ["FSAA"]=0,
+                                    ["FSAALevel"]=0,
+                                    ["AdvUnitShading"]=0,
+                                    ["AllowDeferredMapRendering"]=0},
+                   ['medium']    = {["DepthBufferBits"]=16,
+                                    ["ReflectiveWater"]=1,
+                                    ["Shadows"]=0,
+                                    ["3DTrees"]=1,
+                                    ["AdvSky"]=0,
+                                    ["DynamicSky"]=0,
+                                    ["SmoothPoints"]=0,
+                                    ["SmoothLines"]=1,
+                                    ["FSAA"]=0,
+                                    ["FSAALevel"]=0,
+                                    ["AdvUnitShading"]=0,
+                                    ["AllowDeferredMapRendering"]=0},
+                   ['high']      = {["DepthBufferBits"]=24,
+                                    ["ReflectiveWater"]=2,
+                                    ["Shadows"]=1,
+                                    ["3DTrees"]=1,
+                                    ["AdvSky"]=0,
+                                    ["DynamicSky"]=0,
+                                    ["SmoothPoints"]=0,
+                                    ["SmoothLines"]=1,
+                                    ["FSAA"]=0,
+                                    ["FSAALevel"]=0,
+                                    ["AdvUnitShading"]=1,
+                                    ["AllowDeferredMapRendering"]=0},
+                   ['very high'] = {["DepthBufferBits"]=24,
+                                    ["ReflectiveWater"]=3,
+                                    ["Shadows"]=1,
+                                    ["3DTrees"]=1,
+                                    ["AdvSky"]=1,
+                                    ["DynamicSky"]=1,
+                                    ["SmoothPoints"]=1,
+                                    ["SmoothLines"]=1,
+                                    ["FSAA"]=1,
+                                    ["FSAALevel"]=1,
+                                    ["AdvUnitShading"]=1,
+                                    ["AllowDeferredMapRendering"]=1}}
+local QUALITY_WIDGETS = {['very low'] =  {"disablewidget Screen-Space Ambient Occlusion",
+                                          "disablewidget Post-processing"},
+                         ['low'] =       {"disablewidget Screen-Space Ambient Occlusion",
+                                          "disablewidget Post-processing"},
+                         ['medium'] =    {"disablewidget Screen-Space Ambient Occlusion",
+                                          "disablewidget Post-processing"},
+                         ['high'] =      {"disablewidget Screen-Space Ambient Occlusion",
+                                          "enablewidget Post-processing"},
+                         ['very high'] = {"enablewidget Screen-Space Ambient Occlusion",
+                                          "enablewidget Post-processing"}}
+local DEF_QUALITY = 'unknown'
+
+local DETAIL_KEYS = {'low', 'medium', 'high'}  -- To ensure the order
+local DETAILS = {['low']    = {["ShadowMapSize"]=1024,
+                               -- ["TreeRadius"]=600,  -- Overwritten at restart
+                               ["GroundDetail"]=20,
+                               ["UnitLodDist"]=100,
+                               ["GrassDetail"]=0,
+                               ["GroundDecals"]=0,
+                               ["UnitIconDist"]=100,
+                               ["MaxParticles"]=100,
+                               ["MaxNanoParticles"]=100},
+                 ['medium'] = {["ShadowMapSize"]=4096,
+                               -- ["TreeRadius"]=1900,  -- Overwritten at restart
+                               ["GroundDetail"]=70,
+                               ["UnitLodDist"]=350,
+                               ["GrassDetail"]=15,
+                               ["GroundDecals"]=0,
+                               ["UnitIconDist"]=550,
+                               ["MaxParticles"]=4000,
+                               ["MaxNanoParticles"]=6000},
+                 ['high']   = {["ShadowMapSize"]=8192,
+                               -- ["TreeRadius"]=3000,  -- Overwritten at restart
+                               ["GroundDetail"]=120,
+                               ["UnitLodDist"]=1000,
+                               ["GrassDetail"]=30,
+                               ["GroundDecals"]=1,
+                               ["UnitIconDist"]=1000,
+                               ["MaxParticles"]=20000,
+                               ["MaxNanoParticles"]=20000}}
+local DEF_DETAIL = 'unknown'
+
+local RESTART_QUERIES = {quality=false, detail=false}
+
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
@@ -27,6 +132,68 @@ local function SetRestartButton(win)
     button = win.ok_button
     button:SetCaption("Restart")
     button.OnMouseUp = { Restart }
+end
+
+local function SetAutoButton(win)
+    for _,v in pairs(RESTART_QUERIES) do
+        if v then
+            SetRestartButton(win)
+            return
+        end
+    end
+    SetBackButton(win)
+end
+
+local function GetDefaultSettings(map)
+    -- map shall be QUALITIES or DETAILS
+    local stored_settings = {}
+    for name, settings in pairs(map) do
+        local is_this = true
+        for k, v in pairs(settings) do
+            stored_settings[k] = Spring.GetConfigInt(k)
+            if stored_settings[k] ~= v then
+                is_this = false
+            end
+        end
+        if is_this then
+            return name, settings
+        end
+    end
+    return "custom", stored_settings
+end
+
+local function SetSettings(settings)
+    for k, v in pairs(settings) do
+        Spring.SetConfigInt(k, v)
+    end    
+end
+
+local function QualityChange(self, itemIdx)
+    local win = TopLevelParent(self)
+    local name = self.items[itemIdx]
+    if name == DEF_QUALITY then
+        RESTART_QUERIES.quality = false
+    else
+        RESTART_QUERIES.quality = true
+    end
+    SetAutoButton(win)
+    SetSettings(QUALITIES[name])
+    for _,cmd in ipairs(QUALITY_WIDGETS[name]) do
+        Spring.Echo("***luaui " .. cmd)
+        Spring.SendCommands({"luaui " .. cmd})
+    end
+end
+
+local function DetailChange(self, itemIdx)
+    local win = TopLevelParent(self)
+    local name = self.items[itemIdx]
+    if name == DEF_DETAIL then
+        RESTART_QUERIES.detail = false
+    else
+        RESTART_QUERIES.detail = true
+    end
+    SetAutoButton(win)
+    SetSettings(DETAILS[name])
 end
 
 local function ResolutionStrToNum(str)
@@ -108,20 +275,50 @@ function this:New(obj)
         padding = {5,5,5,5},
     }
 
+    local name, settings = GetDefaultSettings(QUALITIES)
+    DEF_QUALITY = name
+    local itemIdx
+    for i,k in ipairs(QUALITY_KEYS) do
+        if name == k then
+            itemIdx = i
+        end
+    end
+    if itemIdx == nil then
+        itemIdx = #QUALITY_KEYS + 1
+        QUALITY_KEYS[itemIdx] = name
+        QUALITIES[name] = settings
+    end
     local _, _, quality = ComboBoxWithLabel({
         parent = grid,
         caption = "Graphics Quality",
         backgroundColor = { 1, 1, 1, 1 },
-        OnSelect = { NotImplemented },
-        items = {'very low','low','medium','high','very high'},
+        OnSelect = { QualityChange },
+        items = QUALITY_KEYS,
+        selected = itemIdx,
     })
+
+    local name, settings = GetDefaultSettings(DETAILS)
+    DEF_DETAIL = name
+    local itemIdx
+    for i,k in ipairs(DETAIL_KEYS) do
+        if name == k then
+            itemIdx = i
+        end
+    end
+    if itemIdx == nil then
+        itemIdx = #DETAIL_KEYS + 1
+        DETAIL_KEYS[itemIdx] = name
+        DETAILS[name] = settings
+    end
     local _, _, detail = ComboBoxWithLabel({
         parent = grid,
         caption = "Graphics Detail",
         backgroundColor = { 1, 1, 1, 1 },
-        OnSelect = { NotImplemented },
-        items = {'low','medium','high'},
+        OnSelect = { DetailChange },
+        items = DETAIL_KEYS,
+        selected = itemIdx,
     })
+
     local vsx, vsy = gl.GetViewSizes()
     local items = {}
     for i,v in ipairs(RESOLUTIONS) do

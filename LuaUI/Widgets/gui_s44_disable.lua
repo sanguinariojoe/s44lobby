@@ -42,7 +42,7 @@ local widgets = {
 }
 
 local unbinds = {
-    "f11",
+    -- "f11",
     "Shift+esc",
 }
 
