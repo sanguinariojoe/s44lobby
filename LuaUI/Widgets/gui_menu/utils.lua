@@ -28,6 +28,11 @@ function Quit()
     Spring.SendCommands({"QuitForce",})
 end
 
+function Restart()
+    local script = VFS.LoadFile("script.txt")
+    Spring.Restart("", script)
+end
+
 function NotImplemented()
     Spring.Log("Menu", "warning", "Calling non-implemented action")
 end
@@ -48,7 +53,11 @@ function ComboBoxWithLabel(obj)
         valign = "center"
     }
     obj.caption = ""
+    -- We don't want the combobox trigger an action while it is setup
+    OnSelect = obj.OnSelect
+    obj.OnSelect = nil
     local combobox = Chili.ComboBox:New(obj)
+    combobox.OnSelect = OnSelect
 
     return grid, label, combobox
 end
