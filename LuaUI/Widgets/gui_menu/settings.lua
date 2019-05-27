@@ -231,14 +231,23 @@ local function ResolutionChange(self, itemIdx)
     Spring.SendCommands("Fullscreen 1")
 end
 
+local function GoToPostProcess(self)
+    local win = TopLevelParent(self)
+    local child = win.postprocess_win
+    child:Show(win)
+    win:Hide()
+end
+
 --//=============================================================================
 
-function this:New(obj)
+function this:New(obj, postprocess_win)
+    self.postprocess_win = postprocess_win
+
     obj.x = obj.x or '30%'
     obj.y = obj.y or '10%'
     obj.minwidth = 320
     obj.width = obj.width or '40%'
-    obj.minHeight = 64 * 4 + 3 * 5 + 2 * 16
+    obj.minHeight = 64 * 5 + 3 * 5 + 2 * 16
     obj.height = obj.height or obj.minHeight
 
     obj = inherited.New(self, obj)
@@ -250,10 +259,16 @@ function this:New(obj)
         x = '0%',
         y = 64 * 3 + 2 * 5,
         width = '100%',
-        height = 64 + 5,
-        rows = 1,
+        height = 64 * 2 + 5,
+        rows = 2,
         columns = 1,        
         padding = {5,0,5,5},
+    }
+    local postprocess = Chili.Button:New {
+        parent = grid,
+        caption = "GFX Post-Processing",
+        backgroundColor = { 1, 1, 1, 1 },
+        OnMouseUp = { GoToPostProcess },
     }
     local ok = Chili.Button:New {
         parent = grid,
