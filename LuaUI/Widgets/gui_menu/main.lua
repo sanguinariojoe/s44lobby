@@ -18,10 +18,18 @@ local function GoToSettings(self)
     win:Hide()
 end
 
+local function GoToWiki(self)
+    local win = TopLevelParent(self)
+    local child = win.wiki_win
+    child:Show(win)
+    win:Hide()
+end
+
 --//=============================================================================
 
-function this:New(obj, settings_win)
+function this:New(obj, settings_win, wiki_win)
     self.settings_win = settings_win
+    self.wiki_win = wiki_win
 
     obj.x = obj.x or '30%'
     obj.y = obj.y or '10%'
@@ -60,7 +68,7 @@ function this:New(obj, settings_win)
         parent = grid,
         caption = "Units",
         backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { NotImplemented },
+        OnMouseUp = { GoToWiki },
     }
     local ConfigButton = Chili.Button:New {
         parent = grid,

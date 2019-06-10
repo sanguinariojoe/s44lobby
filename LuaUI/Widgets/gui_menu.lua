@@ -15,6 +15,7 @@ local components = {
     "main.lua",
     "settings.lua",
     "postprocess.lua",
+    "wiki.lua",
 }
 
 function widget:Initialize()
@@ -38,9 +39,12 @@ function widget:Initialize()
     local settings = Chili.SettingsWindow:New({
         parent = Screen0,
     }, postprocess)
+    local wiki = Chili.UnitsTreeWindow:New({
+        parent = Screen0,
+    })
     local main = Chili.MainWindow:New({
         parent = Screen0,
-    }, settings)
+    }, settings, wiki)
     -- Fire up main window
     main:Show()
 end
