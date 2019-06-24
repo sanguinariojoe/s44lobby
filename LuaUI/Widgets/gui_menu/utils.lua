@@ -152,3 +152,42 @@ function CheckboxWithLabel(obj)
 
     return grid, label, checkbox
 end
+
+function TreeNode(file, caption)
+    local Chili = WG.Chili
+
+    local grid = Chili.Grid:New {
+        x = 0,
+        y = 0,
+        width = "100%",
+        height = 48,
+    }
+
+    local image = Chili.Image:New {
+        parent = grid,
+        file = file,
+        keepAspect = true,
+    }
+    
+    local label = Chili.Label:New {
+        parent = grid,
+        caption = caption,
+        align = "left",
+        valign = "center",
+    }
+
+    return grid, image, label
+    
+    --[[
+    local caption = obj.caption
+    obj.caption = ""
+    local image = Chili.Image:New(obj)
+    local label = Chili.Label:New {
+        parent = obj.parent,
+        caption = caption,
+        align = "center",
+        valign = "bottom"
+    }
+    return image, label
+    --]]
+end

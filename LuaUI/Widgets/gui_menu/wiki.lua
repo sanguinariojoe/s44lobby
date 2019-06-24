@@ -32,12 +32,30 @@ function UnitsTreeWindow:New(obj)
     }
 
     -- Add the controls
+    local data = {}
+    local factions = VFS.Include("gamedata/sidedata.lua")
+    for _, faction in ipairs(factions) do
+        if faction.startUnit ~= 'gmtoolbox' and faction.name ~= 'Random Team (GM)' then
+            Spring.Echo(faction.name)
+            data[#data + 1], _ = TreeNode(
+                'LuaUI/Widgets/faction_change/' .. string.lower(faction.name) .. '.png',
+                faction.name)
+        end
+    end
+
+
+    --[[
     local tree = Chili.TreeView:New {
         parent = grid,
         nodes = {"I", "II", {"II.a", "II.b", Chili.Image:New {
             keepAspect = true,
             file = "LuaUI/Widgets/gui_menu/rsrc/S44-logo-vector.png",
         }}}
+    }
+    --]]
+    local tree = Chili.TreeView:New {
+        parent = grid,
+        nodes = data,
     }
 
     -- Hiden by default
