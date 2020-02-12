@@ -77,8 +77,8 @@ function _units_tree(startUnit, side)
     end
     for i = 1,#children do
         name = _unit_name(children[i], side)
-        obj, subtree = _units_tree(name, side)
-        tree[#tree + 1] = obj
+        subobj, subtree = _units_tree(name, side)
+        tree[#tree + 1] = subobj
         if #subtree > 0 then
             tree[#tree + 1] = subtree
         end
