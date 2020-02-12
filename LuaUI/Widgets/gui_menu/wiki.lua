@@ -90,9 +90,14 @@ function UnitsTreeWindow:New(obj)
     obj.x = obj.x or '0%'
     obj.y = obj.y or '0%'
     obj.minwidth = 320
-    obj.width = obj.width or '25%'
+    obj.width = obj.width or '100%'
     obj.minHeight = 240
     obj.height = obj.height or '100%'
+    obj.backgroundColor = {0.0,0.0,0.0,1.0}
+    obj.borderColor = {0.0,0.0,0.0,1.0}
+    obj.borderColor2 = {0.0,0.0,0.0,1.0}
+    obj.TileImage = ":c:empty.png"
+
 
     obj = UnitsTreeWindow.inherited.New(self, obj)
 
@@ -100,7 +105,7 @@ function UnitsTreeWindow:New(obj)
         parent = obj,
         x = '0%',
         y = '0%',
-        width = '100%',
+        width = '25%',
         height = '100%',
         rows = 2,
         columns = 1,        
@@ -121,16 +126,6 @@ function UnitsTreeWindow:New(obj)
         end
     end
 
-
-    --[[
-    local tree = Chili.TreeView:New {
-        parent = grid,
-        nodes = {"I", "II", {"II.a", "II.b", Chili.Image:New {
-            keepAspect = true,
-            file = "LuaUI/Widgets/gui_menu/rsrc/S44-logo-vector.png",
-        }}}
-    }
-    --]]
     local tree = Chili.TreeView:New {
         parent = grid,
         nodes = data,

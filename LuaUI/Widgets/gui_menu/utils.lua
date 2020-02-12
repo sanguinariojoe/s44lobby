@@ -177,17 +177,4 @@ function TreeNode(file, caption)
     }
 
     return grid, image, label
-    
-    --[[
-    local caption = obj.caption
-    obj.caption = ""
-    local image = Chili.Image:New(obj)
-    local label = Chili.Label:New {
-        parent = obj.parent,
-        caption = caption,
-        align = "center",
-        valign = "bottom"
-    }
-    return image, label
-    --]]
 end
