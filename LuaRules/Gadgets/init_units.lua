@@ -79,12 +79,12 @@ end
 
 -- keep track of choosing faction ingame
 function gadget:RecvLuaMsg(msg, playerID)
-	local code = string.sub(msg,1,1)
-	if code ~= '\140' then
-		return
-	end
+    local code = string.sub(msg,1,1)
+    if code ~= '\140' then
+        return
+    end
 
-	UNITNAME = string.sub(msg,2,string.len(msg))
+    UNITNAME = string.sub(msg,2,string.len(msg))
     updateUnit()
 end
 
