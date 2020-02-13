@@ -79,7 +79,7 @@ function ParseFaction(faction)
         align  = "center",
         valign = "center",
     }
-    label.font.size = label.font.size * 2
+    label.font.size = 18
 
     local grid = Chili.ScrollPanel:New {
         parent = obj,
