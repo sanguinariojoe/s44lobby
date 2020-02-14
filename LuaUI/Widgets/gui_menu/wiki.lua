@@ -9,6 +9,7 @@ DescriptionWindow = nil
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/wiki_parsers.lua")
 
 --//=============================================================================
 
@@ -76,7 +77,6 @@ function CreateTitle(parent, imgpath, txt)
         font = {size = math.floor(21 * (parent.width - dw) / (473.0 - dw))},
     }
 
-    Spring.Echo(label.font.size)
     return y + label.height + 10
 end
 
@@ -100,7 +100,6 @@ function ParseFaction(faction)
 
     grid.BorderTileImage = ":c:empty.png"
     grid.BackgroundTileImage = ":c:empty.png"
-    -- grid.TileImage = ":c:empty.png"
 
     local fontsize = 14
     local dw = obj.padding[1] + obj.padding[3]
@@ -118,6 +117,69 @@ function ParseFaction(faction)
     }
 end
 
+function ParseUnit(unitDef)
+    local obj = DescriptionWindow
+    obj:ClearChildren()
+
+    local y = CreateTitle(obj,
+                          'unitpics/' .. unitDef.buildpicname,
+                          unitDef.humanName)
+    local h = obj.height - y
+
+    local scroll = Chili.ScrollPanel:New {
+        parent = obj,
+        x = '0%',
+        y = y,
+        width = '100%',
+        height = h,
+        horizontalScrollbar = false,
+    }
+    scroll.BorderTileImage = ":c:empty.png"
+    scroll.BackgroundTileImage = ":c:empty.png"
+
+    --[[
+    local grid = Chili.StackPanel:New {
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '100%',
+        parent = scroll,
+    }
+    --]]
+    local grid = scroll
+
+    local fontsize = 14
+    local dw = obj.padding[1] + obj.padding[3]
+    if fontsize > math.floor(21 * (obj.width - dw) / (473.0 - dw)) then
+        fontsize = math.floor(21 * (obj.width - dw) / (473.0 - dw))
+    end
+
+    -- Main unit documentation
+    local customParams = unitDef.customParams
+    if customParams then
+        local parser = customParams.wiki_parser
+        if parser == "yard" then
+            _parse_yard(grid, unitDef, fontsize)
+        elseif parser == "storage" then
+            _parse_storage(grid, unitDef, fontsize)
+        elseif parser == "supplies" then
+            _parse_supplies(grid, unitDef, fontsize)
+        elseif parser == "infantry" then
+            _parse_infantry(grid, unitDef, fontsize)
+        elseif parser == "vehicle" then
+            _parse_vehicle(grid, unitDef, fontsize)
+        elseif parser == "aircraft" then
+            _parse_aircraft(grid, unitDef, fontsize)
+        elseif parser == "boat" then
+            if customParams.child then
+                _parse_turret(grid, unitDef, fontsize)
+            else
+                _parse_boat(grid, unitDef, fontsize)
+            end
+        end
+    end
+end
+
 function NodeSelected(self, node)
     if node.children[1].faction ~= nil then
         ParseFaction(node.children[1].faction)
@@ -125,7 +187,7 @@ function NodeSelected(self, node)
     end
 
     if node.children[1].unitDef ~= nil then
-        Spring.Echo(node.children[1].unitDef.humanName)
+        ParseUnit(node.children[1].unitDef)
         return
     end    
 end
@@ -172,9 +234,8 @@ function UnitsTreeWindow:New(obj)
     obj.y = obj.y or '0%'
     obj.width = obj.width or '100%'
     obj.height = obj.height or '100%'
-    obj.backgroundColor = {0.0,0.0,0.0,1.0}
-    obj.borderColor = {0.0,0.0,0.0,1.0}
-    obj.borderColor2 = {0.0,0.0,0.0,1.0}
+    obj.resizable = false
+    obj.draggable = false
     obj.TileImage = ":c:empty.png"
 
     obj = UnitsTreeWindow.inherited.New(self, obj)
@@ -186,6 +247,8 @@ function UnitsTreeWindow:New(obj)
         y = '0%',
         width = '25%',
         height = '95%',
+        resizable = false,
+        draggable = false,
     }
 
     DescriptionWindow = subwin
@@ -197,6 +260,8 @@ function UnitsTreeWindow:New(obj)
         y = '0%',
         width = '25%',
         height = '95%',
+        resizable = false,
+        draggable = false,
     }
 
     local data = {}
@@ -217,7 +282,7 @@ function UnitsTreeWindow:New(obj)
         parent = subwin,
         nodes = data,
         OnSelectNode = { NodeSelected },
-    }
+    }    
 
     -- Create a back button
     local ok = Chili.Button:New {

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="16"
+   height="16"
+   id="svg9"
+   sodipodi:docname="range_icon.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+  <metadata
+     id="metadata15">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Out of project scope icon (monochrome variant)</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs13" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1006"
+     id="namedview11"
+     showgrid="false"
+     inkscape:zoom="20.85965"
+     inkscape:cx="3.5718517"
+     inkscape:cy="10.612579"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg9" />
+  <title
+     id="title2">Out of project scope icon (monochrome variant)</title>
+  <g
+     id="Out_of_project_scope-mono-group"
+     transform="matrix(0.07142857,0,0,0.07142856,-1.1428571,-1.14285)">
+    <path
+       id="Out_of_project_scope-mono-shapebg"
+       style="fill:#ffffff"
+       d="M 16,15.999939 H 240 V 239.99999 H 16 Z"
+       inkscape:connector-curvature="0" />
+    <path
+       id="Out_of_project_scope-mono-shapefg1"
+       style="fill:#000000"
+       d="m 16,47.999989 v 32.000012 c 32.670937,0 63.000636,9.739275 88.2832,26.462889 L 127.16992,83.578117 C 95.775778,61.191636 57.400217,47.999989 16,47.999989 Z"
+       inkscape:connector-curvature="0" />
+    <path
+       id="Out_of_project_scope-mono-shapefg2"
+       style="fill:#000000"
+       d="m 172.42969,128.82617 -22.88867,22.88866 c 16.72183,25.28372 26.45897,55.61466 26.45897,88.28516 H 208 c 0,-41.39876 -13.18786,-79.77748 -35.57031,-111.17382 z"
+       inkscape:connector-curvature="0" />
+    <path
+       id="Out_of_project_scope-mono-arrowfg"
+       style="fill:#000000"
+       d="m 220.97266,33.605507 c -1.26043,-0.107339 -2.96875,0.492094 -2.96875,0.492094 l -68.28516,23.898406 c -0.71425,0.250205 -1.71484,0.799975 -1.71484,1.999975 0,1.2 1.00144,1.500095 2.66797,2.000051 l 15.93359,4.781253 -150.605467,150.589904 -1e-6,22.6328 H 38.6328 l 150.58986,-150.605558 4.78125,15.933658 c 0.50003,1.66662 0.79999,2.66789 2,2.66789 1.20001,0 1.75002,-1.00052 2,-1.71477 l 23.89844,-68.285177 c 0,0 1.06451,-3.03685 0.10159,-4.000025 -0.24076,-0.241134 -0.61115,-0.35452 -1.03124,-0.390803 z"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

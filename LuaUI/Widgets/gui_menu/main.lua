@@ -37,6 +37,8 @@ function this:New(obj, settings_win, wiki_win)
     obj.width = obj.width or '40%'
     obj.minHeight = 64 * 4
     obj.height = obj.height or '80%'
+    obj.resizable = false
+    obj.draggable = false
 
     obj = inherited.New(self, obj)
 

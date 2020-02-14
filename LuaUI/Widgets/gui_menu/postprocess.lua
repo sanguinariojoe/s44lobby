@@ -29,6 +29,8 @@ function this:New(obj)
     obj.width = obj.width or '40%'
     obj.minHeight = 40 * 8 + 64 + 3 * 5 + 2 * 16
     obj.height = obj.height or obj.minHeight
+    obj.resizable = false
+    obj.draggable = false
 
     obj = inherited.New(self, obj)
 

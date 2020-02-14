@@ -249,6 +249,8 @@ function this:New(obj, postprocess_win)
     obj.width = obj.width or '40%'
     obj.minHeight = 64 * 5 + 3 * 5 + 2 * 16
     obj.height = obj.height or obj.minHeight
+    obj.resizable = false
+    obj.draggable = false
 
     obj = inherited.New(self, obj)
 
