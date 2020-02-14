@@ -52,41 +52,49 @@ function _unit_name(id, side)
     return name
 end
 
-function ParseFaction(faction)
-    local obj = DescriptionWindow
-    -- Setup the window
-    obj:ClearChildren()
-    local grid = Chili.Grid:New {
-        parent = obj,
-        x = '0%',
-        y = '0%',
-        width = '100%',
-        height = '10%',
-        minHeight = 64,
-        rows = 2,
-        columns = 1,
-    }
-
+function CreateTitle(parent, imgpath, txt)
     local img = Chili.Image:New {
-        parent = grid,
-        file = 'LuaUI/Widgets/faction_change/' .. string.lower(faction.name) .. '.png',
+        parent = parent,
+        file = imgpath,
+        y = '0%',
+        width = '25%',
         keepAspect = true,
     }
 
+    img.x = 0.5 * (parent.width - img.width)
+    y = img.height + 5
+
+    local dw = parent.padding[1] + parent.padding[3]
     local label = Chili.Label:New {
-        parent = grid,
-        caption = faction.wiki_title,
+        x = '0%',
+        y = y,
+        width = '100%',
+        parent = parent,
+        caption = txt,
         align  = "center",
         valign = "center",
+        font = {size = math.floor(21 * (parent.width - dw) / (473.0 - dw))},
     }
-    label.font.size = 18
+
+    Spring.Echo(label.font.size)
+    return y + label.height + 10
+end
+
+function ParseFaction(faction)
+    local obj = DescriptionWindow
+    obj:ClearChildren()
+
+    local y = CreateTitle(obj,
+                          'LuaUI/Widgets/faction_change/' .. string.lower(faction.name) .. '.png',
+                          faction.wiki_title)
+    local h = obj.height - y
 
     local grid = Chili.ScrollPanel:New {
         parent = obj,
         x = '0%',
-        y = '10%',
+        y = y,
         width = '100%',
-        height = '90%',
+        height = h,
         horizontalScrollbar = false,
     }
 
@@ -94,6 +102,11 @@ function ParseFaction(faction)
     grid.BackgroundTileImage = ":c:empty.png"
     -- grid.TileImage = ":c:empty.png"
 
+    local fontsize = 14
+    local dw = obj.padding[1] + obj.padding[3]
+    if fontsize > math.floor(21 * (obj.width - dw) / (473.0 - dw)) then
+        fontsize = math.floor(21 * (obj.width - dw) / (473.0 - dw))
+    end
     local label = Chili.TextBox:New {
         x = '0%',
         y = '0%',
@@ -101,6 +114,7 @@ function ParseFaction(faction)
         height = '100%',
         parent = grid,
         text = faction.wiki_desc,
+        font = {size = fontsize},
     }
 end
 
