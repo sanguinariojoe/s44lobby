@@ -747,7 +747,295 @@ function _parse_aircraft(parent, unitDef, fontsize)
 end
 
 function _parse_boat(parent, unitDef, fontsize)
+    local header = "Boats are the units meant to move and fight by water. In some battle theaters water is just another way to move troops, while in some others a significant number of flags (and tehrefore income) are placed in water, wo you will need a strong army to dispute them."
+
+    local y = _create_description(parent, unitDef, fontsize, header)
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nStructural details\n---------------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 3,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 3 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "hammer_icon.png",
+                "Build cost",
+                tostring(unitDef.metalCost),
+                fontsize)
+    _table_item(grid,
+                "heart_icon.png",
+                "Health points",
+                string.format("%.1f", unitDef.health),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Front armour",
+                tostring(unitDef.customParams.armor_front or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Rear armour",
+                tostring(unitDef.customParams.armor_rear or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Sides armour",
+                tostring(unitDef.customParams.armor_side or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Top armour",
+                tostring(unitDef.customParams.armor_top or 0),
+                fontsize)
+    y = y + grid.height
+
+    y = _create_categories(parent, unitDef, fontsize, y)
+
+    if unitDef.customParams.maxammo ~= nil then
+        local img = Chili.Image:New {
+            parent = parent,
+            file = IconsFolder .. "ammo_icon.png",
+            keepAspect = true,
+            y = y,
+            height = fontsize,
+        }
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Max ammo...",
+            font = {size = fontsize},
+            valign = "center",
+            x = img.width + 5,
+            y = y,
+            width = parent.width - img.width - 5 - 10,
+            minHeight = img.height
+        }
+        y = y + label.height + 5
+
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = tostring(unitDef.customParams.maxammo),
+            font = {size = fontsize},
+            y = y,
+            width = "100%",
+            minHeight = fontsize,
+        }
+        y = y + label.height + 10
+    end
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nLine of sight\n-----------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "binocs_icon.png",
+                "Sight range",
+                string.format("%.1f", unitDef.losRadius),
+                fontsize)
+    _table_item(grid,
+                "airplane_icon.png",
+                "Air detect",
+                string.format("%.1f", unitDef.airLosRadius),
+                fontsize)
+    _table_item(grid,
+                "tank_icon.png",
+                "Noise detect",
+                string.format("%.1f", unitDef.seismicRadius),
+                fontsize)
+    y = y + grid.height
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nMotion\n-----------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "run_icon.png",
+                "Max speed",
+                string.format("%.1f", unitDef.speed / 8.0 * 3.6),
+                fontsize)
+    _table_item(grid,
+                "turn_icon.png",
+                "Turn rate",
+                string.format("%.1f", unitDef.turnRate * 0.16),
+                fontsize)
+    
+    _table_item(grid,
+                "water_icon.png",
+                "Min depth",
+                string.format("%.1f", unitDef.moveDef.depth),
+                fontsize)
+    y = y + grid.height
 end
 
 function _parse_turret(parent, unitDef, fontsize)
+    local header = "This is a turret. The turrets are substructures attached to a main vehicle/structure. They can be disabled one by one, or even got suppressed by enemy fire depending on the specific turret. However, the very only way to completely destroy a turret is destroying the owner vehicle/structure."
+
+    local y = _create_description(parent, unitDef, fontsize, header)
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nStructural details\n---------------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 3,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 3 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "hammer_icon.png",
+                "Build cost",
+                tostring(unitDef.metalCost),
+                fontsize)
+    _table_item(grid,
+                "heart_icon.png",
+                "Health points",
+                string.format("%.1f", unitDef.health),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Front armour",
+                tostring(unitDef.customParams.armor_front or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Rear armour",
+                tostring(unitDef.customParams.armor_rear or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Sides armour",
+                tostring(unitDef.customParams.armor_side or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Top armour",
+                tostring(unitDef.customParams.armor_top or 0),
+                fontsize)
+    y = y + grid.height
+
+    y = _create_categories(parent, unitDef, fontsize, y)
+
+    if unitDef.customParams.maxammo ~= nil then
+        local img = Chili.Image:New {
+            parent = parent,
+            file = IconsFolder .. "ammo_icon.png",
+            keepAspect = true,
+            y = y,
+            height = fontsize,
+        }
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Max ammo...",
+            font = {size = fontsize},
+            valign = "center",
+            x = img.width + 5,
+            y = y,
+            width = parent.width - img.width - 5 - 10,
+            minHeight = img.height
+        }
+        y = y + label.height + 5
+
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = tostring(unitDef.customParams.maxammo),
+            font = {size = fontsize},
+            y = y,
+            width = "100%",
+            minHeight = fontsize,
+        }
+        y = y + label.height + 10
+    end
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nLine of sight\n-----------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "binocs_icon.png",
+                "Sight range",
+                string.format("%.1f", unitDef.losRadius),
+                fontsize)
+    _table_item(grid,
+                "airplane_icon.png",
+                "Air detect",
+                string.format("%.1f", unitDef.airLosRadius),
+                fontsize)
+    _table_item(grid,
+                "tank_icon.png",
+                "Noise detect",
+                string.format("%.1f", unitDef.seismicRadius),
+                fontsize)
+    y = y + grid.height
 end
