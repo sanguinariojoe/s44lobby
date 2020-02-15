@@ -192,25 +192,24 @@ function NodeSelected(self, node)
     end    
 end
 
-function _units_tree(startUnit, side)
-    -- Departs from the starting unit, and traverse all the tech tree derived
-    -- from him, simply following the building capabilities of each unit.
-    local name = startUnit
+function _unit_node(name)
     local unitDef = UnitDefNames[name]
     local buildPic = unitDef.buildpicname
     local obj = TreeNode('unitpics/' .. buildPic, unitDef.humanName)
     obj.unitDef = unitDef
+    return obj
+end
 
-    if UNITS[name] ~= nil then
-        -- The unit has been already digested. Parsing that again will result
-        -- in an infinite loop
-        return obj, {}
-    end
-    UNITS[name] = unitDef.humanName
+function _units_tree(startUnit, side)
+    -- Departs from the starting unit, and traverse all the tech tree derived
+    -- from him, simply following the building capabilities of each unit.
+    local name = startUnit
+    local obj = _unit_node(name)
+    local unitDef = obj.unitDef
 
     local tree = {}
 
-    -- Add its children to the tree
+    -- Get the children
     local children = unitDef.buildOptions
     if name == side .. "pontoontruck" then
         -- The factories transformations are added as morphing links build
@@ -218,12 +217,28 @@ function _units_tree(startUnit, side)
         -- as a build option, so we must manually add it
         children[#children + 1] = side .. "boatyard"
     end
+
+    -- We want to get each unit, and its subtree, parsed as soon as possible.
+    -- However, we don't want to parse each unit subtree more than once, so we
+    -- are keeping a local record of the units we must parse here
+    local parsed = {}
     for i = 1,#children do
         name = _unit_name(children[i], side)
-        subobj, subtree = _units_tree(name, side)
-        tree[#tree + 1] = subobj
-        if #subtree > 0 then
-            tree[#tree + 1] = subtree
+        parsed[i] = UNITS[name] ~= nil
+        UNITS[name] = unitDef.humanName
+    end
+
+    -- Now we can add the entities
+    for i = 1,#children do
+        name = _unit_name(children[i], side)
+        if parsed[i] then
+            tree[#tree + 1] = _unit_node(name)
+        else
+            subobj, subtree = _units_tree(name, side)
+            tree[#tree + 1] = subobj
+            if #subtree > 0 then
+                tree[#tree + 1] = subtree
+            end
         end
     end
     return obj, tree
