@@ -124,7 +124,8 @@ function ParseUnit(unitDef)
     local y = CreateTitle(obj,
                           'unitpics/' .. unitDef.buildpicname,
                           unitDef.humanName)
-    local h = obj.height - y
+    local dh = obj.padding[2] + obj.padding[4]
+    local h = obj.height - dh - y
 
     local scroll = Chili.ScrollPanel:New {
         parent = obj,
