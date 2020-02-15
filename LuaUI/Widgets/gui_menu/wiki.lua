@@ -278,8 +278,18 @@ function UnitsTreeWindow:New(obj)
         end
     end
 
-    local tree = Chili.TreeView:New {
+    local scroll = Chili.ScrollPanel:New {
         parent = subwin,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '100%',
+    }
+    scroll.BorderTileImage = ":c:empty.png"
+    scroll.BackgroundTileImage = ":c:empty.png"
+
+    local tree = Chili.TreeView:New {
+        parent = scroll,
         nodes = data,
         OnSelectNode = { NodeSelected },
     }    
