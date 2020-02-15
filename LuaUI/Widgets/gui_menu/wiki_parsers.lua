@@ -180,7 +180,7 @@ function _parse_yard(parent, unitDef, fontsize)
     _table_item(grid,
                 "heart_icon.png",
                 "Health points",
-                tostring(unitDef.health),
+                string.format("%.1f", unitDef.health),
                 fontsize)
     _table_item(grid,
                 "ammo_icon.png",
@@ -235,7 +235,7 @@ function _parse_storage(parent, unitDef, fontsize)
     _table_item(grid,
                 "heart_icon.png",
                 "Health points",
-                tostring(unitDef.health),
+                string.format("%.1f", unitDef.health),
                 fontsize)
     _table_item(grid,
                 "ammo_icon.png",
@@ -290,7 +290,7 @@ function _parse_supplies(parent, unitDef, fontsize)
     _table_item(grid,
                 "heart_icon.png",
                 "Health points",
-                tostring(unitDef.health),
+                string.format("%.1f", unitDef.health),
                 fontsize)
     _table_item(grid,
                 "ammo_icon.png",
@@ -332,20 +332,10 @@ function _parse_infantry(parent, unitDef, fontsize)
                 "Build cost",
                 tostring(unitDef.metalCost),
                 fontsize)
-    local buildSpeed = unitDef.buildSpeed
-    if buildSpeed == nil or buildSpeed == 0 then
-        buildSpeed = 1
-    end
-    _table_item(grid,
-                "clock_icon.png",
-                "Build time",
-                tostring(unitDef.buildTime / buildSpeed),
-                fontsize)
-    
     _table_item(grid,
                 "heart_icon.png",
                 "Health points",
-                tostring(unitDef.health),
+                string.format("%.1f", unitDef.health),
                 fontsize)
     _table_item(grid,
                 "flag_icon.png",
@@ -383,13 +373,13 @@ function _parse_infantry(parent, unitDef, fontsize)
                 fontsize)
     _table_item(grid,
                 "airplane_icon.png",
-                "Air detection",
+                "Air detect",
                 string.format("%.1f", unitDef.airLosRadius),
                 fontsize)
     
     _table_item(grid,
                 "tank_icon.png",
-                "Noise detection",
+                "Noise detect",
                 string.format("%.1f", unitDef.seismicRadius),
                 fontsize)
     y = y + grid.height
@@ -439,9 +429,321 @@ function _parse_infantry(parent, unitDef, fontsize)
 end
 
 function _parse_vehicle(parent, unitDef, fontsize)
+    local header = "Vehicles are in general faster and stronger than infantry, becoming by themselves a determinant factor in terrain battles. However, vehicles have some significant drawbacks to be considered as well: In general, manufacturing vehicles is not a cheap operation, and their line of sight is quite limited, usually requiring some infantry scouting support."
+
+    local y = _create_description(parent, unitDef, fontsize, header)
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nStructural details\n---------------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 3,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 3 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "hammer_icon.png",
+                "Build cost",
+                tostring(unitDef.metalCost),
+                fontsize)
+    _table_item(grid,
+                "heart_icon.png",
+                "Health points",
+                string.format("%.1f", unitDef.health),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Front armour",
+                tostring(unitDef.customParams.armor_front or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Rear armour",
+                tostring(unitDef.customParams.armor_rear or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Sides armour",
+                tostring(unitDef.customParams.armor_side or 0),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "Top armour",
+                tostring(unitDef.customParams.armor_top or 0),
+                fontsize)
+    y = y + grid.height
+
+    y = _create_categories(parent, unitDef, fontsize, y)
+
+    if unitDef.customParams.maxammo ~= nil then
+        local img = Chili.Image:New {
+            parent = parent,
+            file = IconsFolder .. "ammo_icon.png",
+            keepAspect = true,
+            y = y,
+            height = fontsize,
+        }
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Max ammo...",
+            font = {size = fontsize},
+            valign = "center",
+            x = img.width + 5,
+            y = y,
+            width = parent.width - img.width - 5 - 10,
+            minHeight = img.height
+        }
+        y = y + label.height + 5
+
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = tostring(unitDef.customParams.maxammo),
+            font = {size = fontsize},
+            y = y,
+            width = "100%",
+            minHeight = fontsize,
+        }
+        y = y + label.height + 10
+    end
+    
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nLine of sight\n-----------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "binocs_icon.png",
+                "Sight range",
+                string.format("%.1f", unitDef.losRadius),
+                fontsize)
+    _table_item(grid,
+                "airplane_icon.png",
+                "Air detect",
+                string.format("%.1f", unitDef.airLosRadius),
+                fontsize)
+    
+    _table_item(grid,
+                "tank_icon.png",
+                "Noise detect",
+                string.format("%.1f", unitDef.seismicRadius),
+                fontsize)
+    y = y + grid.height
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nMotion\n-----------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "run_icon.png",
+                "Max speed",
+                string.format("%.1f", unitDef.speed / 8.0 * 3.6),
+                fontsize)
+    _table_item(grid,
+                "turn_icon.png",
+                "Turn rate",
+                string.format("%.1f", unitDef.turnRate * 0.16),
+                fontsize)
+    
+    _table_item(grid,
+                "slope_icon.png",
+                "Max slope",
+                string.format("%.1f", unitDef.moveDef.maxSlope),
+                fontsize)
+    _table_item(grid,
+                "water_icon.png",
+                "Max water depth",
+                string.format("%.1f", (unitDef.moveDef.depth or 0) / 8.0),
+                fontsize)
+    y = y + grid.height
 end
 
 function _parse_aircraft(parent, unitDef, fontsize)
+    local header = "This is an aircraft. Aircrafts are specially expensive to manufacture, althought a significant percentage of the expent command points are recovered if the aircraft comes back home, depending on the damage received during the incursion. Thus, you should try to carry out precise strikes without an excessive risk"
+
+    local y = _create_description(parent, unitDef, fontsize, header)
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nStructural details\n---------------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 1,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 1 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "hammer_icon.png",
+                "Build cost",
+                tostring(unitDef.metalCost),
+                fontsize)
+    _table_item(grid,
+                "heart_icon.png",
+                "Health points",
+                string.format("%.1f", unitDef.health),
+                fontsize)
+    y = y + grid.height
+
+    y = _create_categories(parent, unitDef, fontsize, y)
+
+    if unitDef.customParams.maxammo ~= nil then
+        local img = Chili.Image:New {
+            parent = parent,
+            file = IconsFolder .. "ammo_icon.png",
+            keepAspect = true,
+            y = y,
+            height = fontsize,
+        }
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Max ammo...",
+            font = {size = fontsize},
+            valign = "center",
+            x = img.width + 5,
+            y = y,
+            width = parent.width - img.width - 5 - 10,
+            minHeight = img.height
+        }
+        y = y + label.height + 5
+
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = tostring(unitDef.customParams.maxammo),
+            font = {size = fontsize},
+            y = y,
+            width = "100%",
+            minHeight = fontsize,
+        }
+        y = y + label.height + 10
+    end
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nLine of sight\n-----------------------------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "binocs_icon.png",
+                "Sight range",
+                string.format("%.1f", unitDef.losRadius),
+                fontsize)
+    _table_item(grid,
+                "airplane_icon.png",
+                "Air detect",
+                string.format("%.1f", unitDef.airLosRadius),
+                fontsize)
+    _table_item(grid,
+                "tank_icon.png",
+                "Noise detect",
+                string.format("%.1f", unitDef.seismicRadius),
+                fontsize)
+    y = y + grid.height
+
+    y = y + 10
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "\nMotion\n-----------------\n",
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 2,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 2 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "run_icon.png",
+                "Max speed",
+                string.format("%.1f", unitDef.speed / 8.0 * 3.6),
+                fontsize)
+    _table_item(grid,
+                "turn_icon.png",
+                "Turn rate",
+                string.format("%.1f", unitDef.turnRate * 0.16),
+                fontsize)
+    
+    _table_item(grid,
+                "fuel_icon.png",
+                "Max fuel",
+                string.format("%.1f", unitDef.customParams.maxfuel),
+                fontsize)
+    y = y + grid.height
 end
 
 function _parse_boat(parent, unitDef, fontsize)
