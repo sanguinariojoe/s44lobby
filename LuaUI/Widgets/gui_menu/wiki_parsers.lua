@@ -141,6 +141,56 @@ function _create_categories(parent, unitDef, fontsize, y)
     return y + label.height + 10
 end
 
+function _children_table(parent, title, children, fontsize, y)
+    if y == nil then y = 0 end
+
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = title,
+        font = {size = fontsize},
+        y = y,
+        width= "100%",
+    }
+    y = y + label.height
+
+    local rows = math.ceil(#children / 2)
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = rows,
+        columns = 2,
+        y = y,
+        width = "100%",
+    }
+    
+    for _, child in ipairs(children) do
+        Spring.Echo(child)
+        local unitDef = UnitDefNames[string.lower(child)]
+        local buildPic = unitDef.buildpicname
+        if not VFS.FileExists('unitpics/' .. buildPic) then
+            Spring.Echo("Can't find ", 'unitpics/' .. buildPic)
+        end
+
+        local subgrid = Chili.Grid:New {
+            parent = grid,
+            rows = 2,
+            columns = 1,
+            width = "100%",
+        }
+
+        local img = Chili.Image:New {
+            parent = subgrid,
+            file = IconsFolder .. buildPic,
+            keepAspect = true,
+        }
+        local label = Chili.Label:New {
+            parent = subgrid,
+            caption = unitDef.humanName,
+            font = {size = fontsize},
+            width= "100%",
+        }
+    end
+end
+
 function _parse_yard(parent, unitDef, fontsize)
     local header = "This is a yard, i.e. a static building meant to recruit/build new units. Buildings in general are expensive and fragile critical units, that should indeed be placed far away from enemy sight and fire."
 
@@ -349,7 +399,7 @@ function _parse_infantry(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nLine of sight\n-----------------------------------\n",
+        text = "\nLine of sight\n--------------------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -387,7 +437,7 @@ function _parse_infantry(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nMotion\n-----------------\n",
+        text = "\nMotion\n---------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -521,7 +571,7 @@ function _parse_vehicle(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nLine of sight\n-----------------------------------\n",
+        text = "\nLine of sight\n--------------------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -559,7 +609,7 @@ function _parse_vehicle(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nMotion\n-----------------\n",
+        text = "\nMotion\n---------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -673,7 +723,7 @@ function _parse_aircraft(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nLine of sight\n-----------------------------------\n",
+        text = "\nLine of sight\n--------------------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -710,7 +760,7 @@ function _parse_aircraft(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nMotion\n-----------------\n",
+        text = "\nMotion\n---------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -839,7 +889,7 @@ function _parse_boat(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nLine of sight\n-----------------------------------\n",
+        text = "\nLine of sight\n--------------------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -876,7 +926,7 @@ function _parse_boat(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nMotion\n-----------------\n",
+        text = "\nMotion\n---------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
@@ -910,6 +960,13 @@ function _parse_boat(parent, unitDef, fontsize)
                 string.format("%.1f", unitDef.moveDef.depth),
                 fontsize)
     y = y + grid.height
+
+    -- Turrets
+    y = y + 10
+    if unitDef.customParams.mother and unitDef.customParams.children then
+        local children = loadstring("return " .. unitDef.customParams.children)()
+        _children_table(parent, "\nTurrets\n---------------\n", children, fontsize, y)
+    end
 end
 
 function _parse_turret(parent, unitDef, fontsize)
@@ -1005,7 +1062,7 @@ function _parse_turret(parent, unitDef, fontsize)
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\nLine of sight\n-----------------------------------\n",
+        text = "\nLine of sight\n--------------------------\n",
         font = {size = fontsize},
         y = y,
         width= "100%",
