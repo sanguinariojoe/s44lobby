@@ -172,9 +172,8 @@ function ParseUnit(unitDef)
         elseif parser == "aircraft" then
             _parse_aircraft(grid, unitDef, fontsize)
         elseif parser == "boat" then
-            if customParams.child then
-                _parse_turret(grid, unitDef, fontsize)
-            else
+            if not customParams.child then
+                -- Otherwise it is a turret
                 _parse_boat(grid, unitDef, fontsize)
             end
         end
