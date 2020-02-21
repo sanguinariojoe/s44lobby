@@ -49,6 +49,11 @@ function createUnit(unitname, x, y, z, alpha)
     z = z or Z
     alpha = alpha or ALPHA
 
+    local features = Spring.GetFeaturesInRectangle(x - 1.0, z - 1.0, x + 1.0, z + 1.0)
+    for _, feature in ipairs(features) do
+        Spring.DestroyFeature(feature)
+    end
+
     local name, active, spectator, teamID
     for _, playerID in ipairs(Spring.GetPlayerList()) do
         name, active, spectator, teamID = Spring.GetPlayerInfo(playerID)

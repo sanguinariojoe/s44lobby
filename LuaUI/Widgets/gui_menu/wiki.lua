@@ -120,6 +120,9 @@ function ParseFaction(faction)
 end
 
 function ParseUnit(unitDef)
+    -- Ask to replace the unit
+    Spring.SendLuaRulesMsg('\140' .. unitDef.name)
+
     local obj = DescriptionWindow
     obj:ClearChildren()
 
