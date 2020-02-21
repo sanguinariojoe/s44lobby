@@ -160,24 +160,28 @@ function ParseUnit(unitDef)
     if customParams then
         local parser = customParams.wiki_parser
         if parser == "yard" then
-            _parse_yard(grid, unitDef, fontsize)
+            y = _parse_yard(grid, unitDef, fontsize)
         elseif parser == "storage" then
-            _parse_storage(grid, unitDef, fontsize)
+            y = _parse_storage(grid, unitDef, fontsize)
         elseif parser == "supplies" then
-            _parse_supplies(grid, unitDef, fontsize)
+            y = _parse_supplies(grid, unitDef, fontsize)
         elseif parser == "infantry" then
-            _parse_infantry(grid, unitDef, fontsize)
+            y = _parse_infantry(grid, unitDef, fontsize)
         elseif parser == "vehicle" then
-            _parse_vehicle(grid, unitDef, fontsize)
+            y = _parse_vehicle(grid, unitDef, fontsize)
         elseif parser == "aircraft" then
-            _parse_aircraft(grid, unitDef, fontsize)
+            y = _parse_aircraft(grid, unitDef, fontsize)
         elseif parser == "boat" then
             if not customParams.child then
                 -- Otherwise it is a turret
-                _parse_boat(grid, unitDef, fontsize)
+                y = _parse_boat(grid, unitDef, fontsize)
             end
         end
     end
+
+    -- Parse the weapons
+    -- =================
+    y = _parse_weapons(grid, "\nWeapons\n----------------\n", unitDef, fontsize, 0, y)
 end
 
 function NodeSelected(self, node)

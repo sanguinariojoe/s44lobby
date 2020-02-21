@@ -141,54 +141,292 @@ function _create_categories(parent, unitDef, fontsize, y)
     return y + label.height + 10
 end
 
-function _children_table(parent, title, children, fontsize, y)
+function _parse_weapon(parent, unitDef, weapon, n, fontsize, x, y)
+    if x == nil then x = 0 end
     if y == nil then y = 0 end
 
+    weaponDef = WeaponDefs[weapon.weaponDef]
+
+    -- We need to inspect the targets to look for weapons that actually
+    -- targets nothing, used as helpers for units. Those weapons shall not
+    -- be documented at all
+    local targets = ""
+    local name, value
+    for name, value in pairs(weapon.onlyTargets) do
+        if value then
+            targets = targets .. name .. "\n"
+        end
+    end
+    if targets == "none\n" then
+        return y
+    end
+
+    local header = "\n" .. weaponDef.name .. " x " .. tostring(n) .. "\n"
+    if weaponDef.customParams.wiki_comments ~= nil then
+        header = header .. weaponDef.customParams.wiki_comments .. "\n"
+    end
+    
+    y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = title,
+        text = header,
         font = {size = fontsize},
+        x = x,
         y = y,
         width= "100%",
     }
     y = y + label.height
 
-    local rows = math.ceil(#children / 2)
+    -- Heading and Pitch data
+    -- ======================
+    local dir = weapon.mainDir or {weapon.mainDirX, weapon.mainDirY, weapon.mainDirZ}
+    local angle = math.deg(math.acos(weapon.maxAngleDif))
+    local minHeading, maxHeading, minPitch, maxPitch
+    local pitchBase = math.deg(math.atan2(
+        dir[2], math.sqrt(dir[1] * dir[1] + dir[3] * dir[3])))
+    if pitchBase + angle > 90 then
+        -- The barrel can be heading everywhere
+        minHeading = -360
+        maxHeading = 360
+        minPitch = math.max(-90, pitchBase - angle)
+        maxPitch = 90
+    else
+        local headingBase = math.deg(math.atan2(-dir[1], dir[3]))
+        minHeading = headingBase - angle
+        maxHeading = headingBase + angle
+        minPitch = math.max(-90, pitchBase - angle)
+        maxPitch = math.min(90, pitchBase + angle)
+    end
+    local speedHeading = unitDef.customParams.turretturnspeed or unitDef.turnRate * 0.16
+    local speedPitch = unitDef.customParams.elevationspeed or speedHeading
+
     local grid = Chili.Grid:New {
         parent = parent,
-        rows = rows,
+        rows = 3,
         columns = 2,
         y = y,
         width = "100%",
+        minHeight = 3 * (32 + 13 * 2),
+        autosize = true,
     }
-    
-    for _, child in ipairs(children) do
-        Spring.Echo(child)
-        local unitDef = UnitDefNames[string.lower(child)]
-        local buildPic = unitDef.buildpicname
-        if not VFS.FileExists('unitpics/' .. buildPic) then
-            Spring.Echo("Can't find ", 'unitpics/' .. buildPic)
-        end
 
-        local subgrid = Chili.Grid:New {
-            parent = grid,
-            rows = 2,
-            columns = 1,
-            width = "100%",
-        }
+    _table_item(grid,
+                "gunheading_icon.png",
+                "Min heading",
+                string.format("%.1f", minHeading),
+                fontsize)
+    _table_item(grid,
+                "gunpitch_icon.png",
+                "Min pitch",
+                string.format("%.1f", minPitch),
+                fontsize)
+    _table_item(grid,
+                "gunheading_icon.png",
+                "Max heading",
+                string.format("%.1f", maxHeading),
+                fontsize)
+    _table_item(grid,
+                "gunpitch_icon.png",
+                "Max pitch",
+                string.format("%.1f", maxPitch),
+                fontsize)
+    _table_item(grid,
+                "gunheading_icon.png",
+                "Heading speed",
+                string.format("%.1f", speedHeading),
+                fontsize)
+    _table_item(grid,
+                "gunpitch_icon.png",
+                "Pitch speed",
+                string.format("%.1f", speedPitch),
+                fontsize)
+    y = y + grid.height + 10
 
-        local img = Chili.Image:New {
-            parent = subgrid,
-            file = IconsFolder .. buildPic,
-            keepAspect = true,
-        }
-        local label = Chili.Label:New {
-            parent = subgrid,
-            caption = unitDef.humanName,
-            font = {size = fontsize},
-            width= "100%",
-        }
+    -- Shot statistics
+    -- ===============
+    local pen100 = weaponDef.customParams.armor_penetration or 0
+    local pen1000 = pen100
+    if weaponDef.customParams.armor_penetration_100m then
+        pen100 = weaponDef.customParams.armor_penetration_100m
     end
+    if weaponDef.customParams.armor_penetration_1000m then
+        pen1000 = weaponDef.customParams.armor_penetration_1000m
+    end
+    local salvoSize = weaponDef.salvoSize * weaponDef.projectiles
+    local salvoTime = math.max(weaponDef.reload,
+                               weaponDef.salvoSize * weaponDef.salvoDelay)
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 4,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 4 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    _table_item(grid,
+                "range_icon.png",
+                "Range",
+                string.format("%.1f", weaponDef.range),
+                fontsize)
+    _table_item(grid,
+                "explosion_icon.png",
+                "Effect radius",
+                string.format("%.1f", weaponDef.damageAreaOfEffect or 0),
+                fontsize)
+    _table_item(grid,
+                "accuracy_icon.png",
+                "Inaccuracy",
+                string.format("%.1f", weaponDef.accuracy),
+                fontsize)
+    _table_item(grid,
+                "accuracy_icon.png",
+                "Moving inaccuracy",
+                string.format("%.1f", weaponDef.movingAccuracy),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "100m",
+                string.format("%.1f", pen100),
+                fontsize)
+    _table_item(grid,
+                "penetration.png",
+                "1000m",
+                string.format("%.1f", pen1000),
+                fontsize)
+    _table_item(grid,
+                "reload_icon.png",
+                "Fire rate",
+                string.format("%.1f", salvoSize / salvoTime),
+                fontsize)
+    _table_item(grid,
+                "ammo_icon.png",
+                "Ammo cost",
+                tostring(weaponDef.customParams.weaponcost or 0),
+                fontsize)
+
+    y = y + grid.height + 10
+
+    -- Targets and damage inflicted
+    -- ============================
+    local damages = ""
+    local name, damage
+    for id, damage in pairs(weaponDef.damages) do
+        if Game.armorTypes[id] ~= nil then
+            local name = Game.armorTypes[id]
+            damages = damages .. name .. ", " .. tostring(damage) .. "\n"
+        end
+    end
+    local img = Chili.Image:New {
+        parent = parent,
+        file = IconsFolder .. "accuracy_icon.png",
+        keepAspect = true,
+        x = x,
+        y = y,
+        height = fontsize,
+    }
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "Targets...",
+        font = {size = fontsize},
+        valign = "center",
+        x = x + img.width + 5,
+        y = y,
+        width = parent.width - img.width - 5 - 10,
+        minHeight = img.height
+    }
+    y = y + label.height + 5
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = targets,
+        font = {size = fontsize},
+        valign = "center",
+        x = x,
+        y = y,
+        width = parent.width - img.width - 5 - 10,
+        minHeight = img.height
+    }
+    y = y + label.height + 10
+
+    local img = Chili.Image:New {
+        parent = parent,
+        file = IconsFolder .. "explosion_icon.png",
+        keepAspect = true,
+        x = x,
+        y = y,
+        height = fontsize,
+    }
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "Damages...",
+        font = {size = fontsize},
+        valign = "center",
+        x = x + img.width + 5,
+        y = y,
+        width = parent.width - img.width - 5 - 10,
+        minHeight = img.height
+    }
+    y = y + label.height + 5
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = damages,
+        font = {size = fontsize},
+        valign = "center",
+        x = x,
+        y = y,
+        width = parent.width - img.width - 5 - 10,
+        minHeight = img.height
+    }
+    y = y + label.height + 10
+
+    return y
+end
+
+function _parse_weapons(parent, header, unitDef, fontsize, x, y)
+    if ((unitDef.customParams.wiki_parser == "boat") and unitDef.customParams.mother) then
+        return y
+    end
+
+    if x == nil then x = 0 end
+    if y == nil then y = 0 end
+
+    local weapons = unitDef.weapons
+    if weapons ~= nil and #weapons > 0 then
+        if header ~= nil then
+            local label = Chili.TextBox:New {
+                parent = parent,
+                text = header,
+                font = {size = fontsize},
+                x = x,
+                y = y,
+                width= "100%",
+            }
+            y = y + label.height
+        end
+        -- It may have several incidences of the same turret
+        local n = {}
+        for _, weapon in pairs(weapons) do
+            local name = WeaponDefs[weapon.weaponDef].name
+
+            if n[string.lower(name)] == nil then
+                n[string.lower(name)] = 1
+            else
+                n[string.lower(name)] = n[string.lower(name)] + 1
+            end
+        end
+        for _, weapon in pairs(weapons) do
+            local name = WeaponDefs[weapon.weaponDef].name
+
+            if n[string.lower(name)] ~= nil then
+                y = _parse_weapon(parent, unitDef, weapon, n[string.lower(name)], fontsize, x + 13, y)
+                n[string.lower(name)] = nil
+            end
+        end
+    end
+
+    return y
 end
 
 function _parse_yard(parent, unitDef, fontsize)
@@ -240,6 +478,8 @@ function _parse_yard(parent, unitDef, fontsize)
     y = y + grid.height
 
     y = _create_categories(parent, unitDef, fontsize, y)
+
+    return y + 10
 end
 
 function _parse_storage(parent, unitDef, fontsize)
@@ -295,6 +535,8 @@ function _parse_storage(parent, unitDef, fontsize)
     y = y + grid.height
 
     y = _create_categories(parent, unitDef, fontsize, y)
+
+    return y + 10
 end
 
 function _parse_supplies(parent, unitDef, fontsize)
@@ -350,6 +592,8 @@ function _parse_supplies(parent, unitDef, fontsize)
     y = y + grid.height
 
     y = _create_categories(parent, unitDef, fontsize, y)
+
+    return y + 10
 end
 
 function _parse_infantry(parent, unitDef, fontsize)
@@ -476,6 +720,8 @@ function _parse_infantry(parent, unitDef, fontsize)
                 string.format("%.1f", (unitDef.moveDef.depth or 0) / 8.0),
                 fontsize)
     y = y + grid.height
+
+    return y + 10
 end
 
 function _parse_vehicle(parent, unitDef, fontsize)
@@ -648,6 +894,8 @@ function _parse_vehicle(parent, unitDef, fontsize)
                 string.format("%.1f", (unitDef.moveDef.depth or 0) / 8.0),
                 fontsize)
     y = y + grid.height
+
+    return y + 10
 end
 
 function _parse_aircraft(parent, unitDef, fontsize)
@@ -794,16 +1042,18 @@ function _parse_aircraft(parent, unitDef, fontsize)
                 string.format("%.1f", unitDef.customParams.maxfuel),
                 fontsize)
     y = y + grid.height
+
+    return y + 10
 end
 
-function _parse_turret(parent, unitDef, fontsize, x, y)
+function _parse_turret(parent, unitDef, n, fontsize, x, y)
     if x == nil then x = 0 end
     if y == nil then y = 0 end
 
     y = y + 10
     local label = Chili.TextBox:New {
         parent = parent,
-        text = "\n" .. unitDef.humanName .. "\n",
+        text = "\n" .. unitDef.humanName .. " x " .. tostring(n) .. "\n",
         font = {size = fontsize},
         x = x,
         y = y,
@@ -834,9 +1084,11 @@ function _parse_turret(parent, unitDef, fontsize, x, y)
                     tostring(unitDef.customParams.maxammo),
                     fontsize)
     end
-    y = y + grid.height
+    y = y + grid.height + 10
 
-    return y + 10
+    y = _parse_weapons(parent, nil, unitDef, fontsize, x, y)
+
+    return y
 end
 
 function _parse_boat(parent, unitDef, fontsize)
@@ -1016,9 +1268,23 @@ function _parse_boat(parent, unitDef, fontsize)
         }
         y = y + label.height
         local children = loadstring("return " .. unitDef.customParams.children)()
+        -- It may have several incidences of the same turret
+        local n = {}
         for _, child in ipairs(children) do
-            local unitDef = UnitDefNames[string.lower(child)]
-            y = _parse_turret(parent, unitDef, fontsize, 13, y)
+            if n[string.lower(child)] == nil then
+                n[string.lower(child)] = 1
+            else
+                n[string.lower(child)] = n[string.lower(child)] + 1
+            end
+        end
+        for _, child in ipairs(children) do
+            if n[string.lower(child)] ~= nil then
+                local unitDef = UnitDefNames[string.lower(child)]
+                y = _parse_turret(parent, unitDef, n[string.lower(child)], fontsize, 13, y)
+                n[string.lower(child)] = nil
+            end
         end
     end
+
+    return y
 end
