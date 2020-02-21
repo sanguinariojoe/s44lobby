@@ -18,7 +18,7 @@ function _create_description(parent, unitDef, fontsize, header, y)
         width = "100%",
     }
 
-    return label.height + 10
+    return label.height + 20
 end
 
 function _table_item(grid, img, title, txt, fontsize, y)
@@ -1287,4 +1287,83 @@ function _parse_boat(parent, unitDef, fontsize)
     end
 
     return y
+end
+
+function _squad_children(unitDef)
+    if squadDefs[unitDef.name] == nil and sortieDefs[unitDef.name] == nil then
+        -- Not a squad
+        return nil
+    end
+    local squad = squadDefs[unitDef.name] or sortieDefs[unitDef.name]
+    local members = {}
+    local member, n
+    for _, member in pairs(squad.members) do
+        if members[member] == nil then
+            members[member] = 1
+        else
+            members[member] = members[member] + 1
+        end
+    end
+    return members
+end
+
+function _parse_squad(parent, unitDef, fontsize)
+    local y = 0
+
+    local members = _squad_children(unitDef)
+    if members == nil then
+        return 0
+    end
+
+    local label = Chili.TextBox:New {
+        parent = parent,
+        text = "This is a team composed by the following members...",
+        font = {size = fontsize},
+        y = y,
+        width = "100%",
+    }
+
+    y = label.height + 20
+
+    for member, n in pairs(members) do
+        local memberDef = UnitDefNames[member]
+        local img = Chili.Image:New {
+            parent = parent,
+            file = 'unitpics/' .. memberDef.buildpicname,
+            keepAspect = true,
+            y = y,
+            height = fontsize,
+        }
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = memberDef.humanName .. ' x ' .. n,
+            font = {size = fontsize},
+            valign = "center",
+            x = img.width + 5,
+            y = y,
+            width = parent.width - img.width - 5 - 10,
+            minHeight = img.height
+        }
+        y = y + label.height + 10
+    end
+
+    local grid = Chili.Grid:New {
+        parent = parent,
+        rows = 1,
+        columns = 2,
+        y = y,
+        width = "100%",
+        minHeight = 1 * (32 + 13 * 2),
+        autosize = true,
+    }
+
+    local squad = squadDefs[unitDef.name] or sortieDefs[unitDef.name]
+    _table_item(grid,
+                "hammer_icon.png",
+                "Build cost",
+                tostring(squad.buildCostMetal),
+                fontsize)
+    y = y + grid.height
+
+    return y + 10
 end

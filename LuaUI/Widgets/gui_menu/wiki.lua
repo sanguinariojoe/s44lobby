@@ -10,6 +10,8 @@ DescriptionWindow = nil
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/wiki_parsers.lua")
+squadDefs = include("LuaRules/Configs/squad_defs.lua")
+sortieDefs = include("LuaRules/Configs/sortie_defs.lua")
 
 --//=============================================================================
 
@@ -157,6 +159,7 @@ function ParseUnit(unitDef)
 
     -- Main unit documentation
     local customParams = unitDef.customParams
+    y = _parse_squad(grid, unitDef, fontsize)
     if customParams then
         local parser = customParams.wiki_parser
         if parser == "yard" then
@@ -222,6 +225,14 @@ function _units_tree(startUnit, side)
         children[#children + 1] = side .. "boatyard"
     end
 
+    -- Add also the squad/sortie members as children
+    local members = _squad_children(unitDef)
+    if members ~= nil then
+        for member, _ in pairs(members) do
+            children[#children + 1] = member
+        end
+    end
+
     -- We want to get each unit, and its subtree, parsed as soon as possible.
     -- However, we don't want to parse each unit subtree more than once, so we
     -- are keeping a local record of the units we must parse here
@@ -235,7 +246,8 @@ function _units_tree(startUnit, side)
     -- Now we can add the entities
     for i = 1,#children do
         name = _unit_name(children[i], side)
-        if parsed[i] then
+        -- We always want to traverse the squad/sortie members again
+        if parsed[i] and (_squad_children(UnitDefNames[name]) == nil) then
             tree[#tree + 1] = _unit_node(name)
         else
             subobj, subtree = _units_tree(name, side)
