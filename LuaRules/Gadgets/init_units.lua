@@ -89,6 +89,7 @@ function createUnit(unitname, x, y, z, alpha)
         end
     end
     local unitID = Spring.CreateUnit(unitname, x, y, z, 0, teamID)
+    Spring.SetUnitNoSelect(unitID, true)
     Spring.SetUnitRotation(unitID, 0, math.rad(alpha), 0)
 end
 
