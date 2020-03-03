@@ -17,6 +17,7 @@ end
 
 -- SYNCED
 local X, Y, Z = 9000, 14.5, 7615
+local XS, YS, ZS = 9000, 0, 1200
 local ALPHA = 60
 local UNITNAME = "gerpanzerIII"
 local FLAGNAMES = {"flag", "buoy"}
@@ -53,11 +54,26 @@ function removeUnits(units, skipflags)
     end    
 end
 
+function getCoordinates(name)
+    local unitDef = UnitDefNames[name]
+    if unitDef == nil then
+        return X, Y, Z
+    end
+    local cparams = UnitDefNames[name].customParams
+    local is_boat = cparams.wiki_parser == "boat" and not cparams.child
+    local is_boatyard = cparams.wiki_parser == "yard" and unitDef.floatOnWater
+    if is_boat or is_boatyard then
+        return XS, YS, ZS
+    end
+    return X, Y, Z
+end
+
 function createUnit(unitname, x, y, z, alpha)
     unitname = unitname or UNITNAME
-    x = x or X
-    y = y or Y
-    z = z or Z
+    local xx, yy, zz = getCoordinates(unitname)
+    x = x or xx
+    y = y or yy
+    z = z or zz
     alpha = alpha or ALPHA
 
     local features = Spring.GetFeaturesInRectangle(x - 1.0, z - 1.0, x + 1.0, z + 1.0)

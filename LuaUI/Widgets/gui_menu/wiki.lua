@@ -6,6 +6,9 @@ UnitsTreeWindow = Chili.Window:Inherit{
 
 DescriptionWindow = nil
 
+local X, Y, Z, H = 9000, 14.5, 7615, 262
+local XS, YS, ZS, HS = 9000, 0, 1200, 450
+
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
@@ -182,6 +185,18 @@ function ParseUnit(unitDef)
                 -- Otherwise it is a turret
                 y = _parse_boat(grid, unitDef, fontsize)
             end
+        end
+        -- Readjust the camera
+        if (parser == "boat") or ((parser == "yard") and unitDef.floatOnWater) then
+            WG.look_at_x = XS
+            WG.look_at_y = YS
+            WG.look_at_z = ZS
+            WG.look_height = HS
+        else
+            WG.look_at_x = X
+            WG.look_at_y = Y
+            WG.look_at_z = Z            
+            WG.look_height = H            
         end
     end
 

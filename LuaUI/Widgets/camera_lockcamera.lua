@@ -10,14 +10,19 @@ function widget:GetInfo()
     }
 end
 
+WG.look_at_x = 8990
+WG.look_at_y = 14
+WG.look_at_z = 7620
+WG.look_height = 262
+
 local CAMERADATA = {
     name = ta,
     mode = 1,
     flipped = -1,
-    px = 8990,
-    py = 14,
-    pz = 7620,
-    height = 262,
+    px = WG.look_at_x,
+    py = WG.look_at_y,
+    pz = WG.look_at_z,
+    height = WG.look_height,
     angle = 0.88474917,
     fov = 45,
     dx = 0,
@@ -49,6 +54,11 @@ function widget:GameFrame(n)
     end
     --]]
     if n % 30 == 0 then -- every second
-        Spring.SetCameraState(CAMERADATA, 1)
+        local camera_data = CAMERADATA
+        camera_data.px = WG.look_at_x
+        camera_data.py = WG.look_at_y
+        camera_data.pz = WG.look_at_z
+        camera_data.height = WG.look_height
+        Spring.SetCameraState(camera_data, 1)
     end
 end
