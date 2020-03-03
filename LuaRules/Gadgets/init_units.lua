@@ -35,8 +35,19 @@ function removeUnits(units, skipflags)
         skipflags = true
     end
 
+
     for _,unitID in ipairs(units) do
+        local skip_unit = false
         if not skipflags or not isFlag(UnitDefs[Spring.GetUnitDefID(unitID)].name) then
+            -- Detach and destroy children
+            local children = Spring.GetUnitIsTransporting(unitID)
+            if children ~= nil then
+                for _, childID in ipairs(children) do
+                    Spring.UnitDetach(childID)
+                    Spring.DestroyUnit(childID, false, true)
+                end
+            end
+            -- Destroy the unit itself
             Spring.DestroyUnit(unitID, false, true)
         end
     end    
