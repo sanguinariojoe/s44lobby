@@ -258,8 +258,8 @@ skin.tabbar = {
 }
 
 skin.tabbaritem = {
-  TileImageBK = ":cl:tech_tabbaritem_bk.png",
-  TileImageFG = ":cl:tech_tabbaritem_fg.png",
+  TileImageBK = ":cl:s44_tabbaritem_bk.png",
+  TileImageFG = ":cl:s44_tabbaritem_fg.png",
   tiles = {10, 10, 10, 0}, --// tile widths: left,top,right,bottom
   padding = {5, 3, 3, 2},
   backgroundColor = {1, 1, 1, 1.0},

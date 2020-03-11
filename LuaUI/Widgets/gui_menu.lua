@@ -19,6 +19,12 @@ local components = {
     "wiki.lua",
 }
 
+WG.MENUOPTS = {
+    login_tab = "Register",
+    login_user = "",
+    login_pass = "",
+}
+
 function widget:Initialize()
     if not WG.Chili then
         Spring.Log("Menu", "error", "Chili is not available!")
@@ -56,4 +62,18 @@ function widget:Initialize()
     }, lobby, settings, wiki)
     -- Fire up main window
     main:Show()
+end
+
+function widget:GetConfigData(data)
+    return {
+        login_tab  = WG.MENUOPTS.login_tab,
+        login_user  = WG.MENUOPTS.login_user,
+        login_pass  = WG.MENUOPTS.login_pass,
+    }
+end
+
+function widget:SetConfigData(data)
+    WG.MENUOPTS.login_tab     = data.login_tab or WG.MENUOPTS.login_tab
+    WG.MENUOPTS.login_user     = data.login_user or WG.MENUOPTS.login_user
+    WG.MENUOPTS.login_pass     = data.login_pass or WG.MENUOPTS.login_pass
 end

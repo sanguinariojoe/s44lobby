@@ -88,7 +88,7 @@ function TabPanel:New(obj)
 end
 
 function TabPanel:AddTab(tab, neverSwitchTab)
-	local switchToTab = (#tabbar.children == 0) and not neverSwitchTab
+	local switchToTab = (#self.tabbar.children == 0) and not neverSwitchTab
 		self.tabbar:AddChild(TabBarItem:New {
 			name = tab.name,
 			tooltip = tab.tooltip,

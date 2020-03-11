@@ -7,6 +7,7 @@ LobbyWindow = Chili.Window:Inherit{
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby_login.lua")
 
 --//=============================================================================
 
@@ -50,6 +51,12 @@ function LobbyWindow:New(obj)
     obj.TileImage = ":c:empty.png"
 
     obj = LobbyWindow.inherited.New(self, obj)
+
+    -- Login window
+    obj.log_win = LoginWindow:New {
+        parent = WG.Chili.Screen0,
+    }
+    -- obj.log_win:Show()
 
     -- Create a back button
     local ok = Chili.Button:New {
