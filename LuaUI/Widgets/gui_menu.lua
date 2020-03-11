@@ -12,6 +12,7 @@ function widget:GetInfo()
 end 
 
 local components = {
+    "lobby.lua",
     "main.lua",
     "settings.lua",
     "postprocess.lua",
@@ -24,6 +25,11 @@ function widget:Initialize()
         widgetHandler:RemoveWidget()
         return
     end
+    if not WG.LibLobby then
+        Spring.Log("Menu", "error", "LibLobby is not available!")
+        widgetHandler:RemoveWidget(widget)
+        return
+    end
 
     Chili = WG.Chili
     Screen0 = Chili.Screen0
@@ -33,6 +39,9 @@ function widget:Initialize()
     end
 
     -- Setup the windows
+    local lobby = Chili.LobbyWindow:New({
+        parent = Screen0,
+    })
     local postprocess = Chili.PostprocessWindow:New({
         parent = Screen0,
     })
@@ -44,7 +53,7 @@ function widget:Initialize()
     })
     local main = Chili.MainWindow:New({
         parent = Screen0,
-    }, settings, wiki)
+    }, lobby, settings, wiki)
     -- Fire up main window
     main:Show()
 end

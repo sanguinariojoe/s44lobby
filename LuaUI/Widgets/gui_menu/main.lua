@@ -11,6 +11,13 @@ local inherited = this.inherited
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 
+local function GoToLobby(self)
+    local win = TopLevelParent(self)
+    local child = win.lobby_win
+    child:Show(win)
+    win:Hide()
+end
+
 local function GoToSettings(self)
     local win = TopLevelParent(self)
     local child = win.settings_win
@@ -27,7 +34,8 @@ end
 
 --//=============================================================================
 
-function this:New(obj, settings_win, wiki_win)
+function this:New(obj, lobby_win, settings_win, wiki_win)
+    self.lobby_win = lobby_win
     self.settings_win = settings_win
     self.wiki_win = wiki_win
 
@@ -64,7 +72,7 @@ function this:New(obj, settings_win, wiki_win)
         parent = grid,
         caption = "Multiplayer",
         backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { NotImplemented },
+        OnMouseUp = { GoToLobby },
     }
     local WikiButton = Chili.Button:New {
         parent = grid,
