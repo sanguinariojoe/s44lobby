@@ -9,8 +9,9 @@ lobby_win = nil
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
-VFS.Include("LuaUI/Widgets/gui_menu/lobby_login.lua")
-VFS.Include("LuaUI/Widgets/gui_menu/lobby_vcode.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby/login.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby/vcode.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby/battles_list.lua")
 
 --//=============================================================================
 
@@ -55,6 +56,41 @@ function LobbyWindow:New(obj)
 
     obj = LobbyWindow.inherited.New(self, obj)
 
+    -- Login windows
+    obj.log_win = LoginWindow:New {
+        parent = obj,
+    }
+    obj.log_win:Hide()
+    obj.vcode_win = VerificationCodeWindow:New(
+        {parent = obj},
+        obj.log_win)
+    obj.vcode_win:Hide()
+
+    -- Main tab panel
+    tabs_win = Chili.Window:New {
+        parent = obj,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '95%',
+        resizable = false,
+        draggable = false,
+    }
+    obj.tabs = Chili.TabPanel:New {
+        parent = tabs_win,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '100%',
+        padding = {5, 5, 5, 5},
+    }
+    obj.tabs.tabbar.minItemWidth = 128
+    obj.tabs:AddTab({name="Battle list",
+                     children={BattlesWindow:New({parent=obj.tabs})}})
+    obj.tabs:AddTab({name="Battle list2",
+                     children={BattlesWindow:New({parent=obj.tabs})}})
+
+
     -- Connection status label
     obj.status_label = Chili.Button:New {
         parent = obj,
@@ -67,17 +103,7 @@ function LobbyWindow:New(obj)
     }
     obj.status_label.font.color = {1, 0.2, 0.2, 1}
 
-    -- Login windows
-    obj.log_win = LoginWindow:New {
-        parent = obj,
-    }
-    obj.log_win:Hide()
-    obj.vcode_win = VerificationCodeWindow:New(
-        {parent = obj},
-        obj.log_win)
-    obj.vcode_win:Hide()
-
-    -- Create a back button
+    -- Back button
     local ok = Chili.Button:New {
         parent = obj,
         x = '0%',
@@ -112,6 +138,9 @@ function LobbyWindow:New(obj)
     )
     lobby:AddListener("OnConnect",
         function(listener)
+            if lobby_win.status_label.caption ~= "connecting" then
+                return
+            end
             lobby_win.status_label.caption = "connected"
             lobby_win.status_label.font.color = {1, 1, 0.6, 1}
             -- Try to login with the already known user and password
@@ -156,9 +185,16 @@ function LobbyWindow:New(obj)
             lobby_win.log_win:Show()
         end
     )
+    lobby:AddListener("OnAgreement", 
+        function(listener)
+            lobby_win.status_label.caption = "loading"
+            lobby_win.status_label.font.color = {1, 1, 0.6, 1}
+        end
+    )
     lobby:AddListener("OnAgreementEnd", 
         function(listener)
-            lobby_win.log_win:Hide()
+            lobby_win.status_label.caption = "sign terms"
+            lobby_win.status_label.font.color = {1, 1, 0.6, 1}
         end
     )
 

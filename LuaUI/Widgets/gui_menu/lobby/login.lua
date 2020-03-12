@@ -68,6 +68,8 @@ function LoginWindow:New(obj)
     obj.user_label = Chili.Label:New {
         parent = log_grid,
         caption = "User ",
+        align   = "center",
+        valign  = "center",
     }
     obj.user = Chili.EditBox:New {
         parent = log_grid,
@@ -76,6 +78,8 @@ function LoginWindow:New(obj)
     obj.pass_label = Chili.Label:New {
         parent = log_grid,
         caption = "Password ",
+        align   = "center",
+        valign  = "center",
     }
     obj.pass = Chili.EditBox:New {
         parent = log_grid,
@@ -108,6 +112,8 @@ function LoginWindow:New(obj)
     obj.new_user_label = Chili.Label:New {
         parent = reg_grid,
         caption = "User ",
+        align   = "center",
+        valign  = "center",
     }
     obj.new_user = Chili.EditBox:New {
         parent = reg_grid,
@@ -115,16 +121,20 @@ function LoginWindow:New(obj)
     }
     obj.new_pass_label = Chili.Label:New {
         parent = reg_grid,
-        passwordInput = true,
         caption = "Password ",
+        align   = "center",
+        valign  = "center",
     }
     obj.new_pass = Chili.EditBox:New {
         parent = reg_grid,
+        passwordInput = true,
         text = WG.MENUOPTS.login_pass,
     }
     obj.new_email = Chili.Label:New {
         parent = reg_grid,
         caption = "Email ",
+        align   = "center",
+        valign  = "center",
     }
     obj.new_email = Chili.EditBox:New {
         parent = reg_grid,
@@ -176,6 +186,11 @@ function LoginWindow:New(obj)
             log_win.pass.text = log_win.new_pass.text
             log_win.tabs:ChangeTab("Login")
             Login(log_win.log_ok)
+        end
+    )
+    lobby:AddListener("OnAgreementEnd", 
+        function(listener)
+            log_win:Hide()
         end
     )
 
