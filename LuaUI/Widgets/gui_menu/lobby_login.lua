@@ -4,10 +4,11 @@ LoginWindow = Chili.Window:Inherit{
     drawcontrolv2 = true
 }
 
+log_win = nil
+
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
-VFS.Include("LuaUI/Widgets/gui_menu/lobby_vcode.lua")
 
 --//=============================================================================
 
@@ -23,13 +24,25 @@ function Login(self)
     WG.MENUOPTS.login_pass = win.pass.text
     -- Connect to the lobby
     win:Hide()
-    WG.LibLobby.lobby:Connect("springrts.com", "8200")
+
+    local lobby = WG.LibLobby.lobby
+    lobby:AddListener("OnDenied",
+        function(listener, reason)
+            Spring.Log("Menu", LOG.WARNING, reason)
+            lobby:RemoveListener("OnDenied", listener)
+            win:Show()
+        end
+    )
+    lobby:Login(win.user.text, win.pass.text,
+                3, nil, "Spring:1944")
 end
 
 function Register(self)
     local win = self.win
-    win.vcode_win:Show()
     win:Hide()
+    WG.LibLobby.lobby:Register(win.new_user.text,
+                               win.new_pass.text,
+                               win.new_email.text)
 end
 
 function LoginWindow:New(obj)
@@ -66,6 +79,7 @@ function LoginWindow:New(obj)
     }
     obj.pass = Chili.EditBox:New {
         parent = log_grid,
+        passwordInput = true,
         text = WG.MENUOPTS.login_pass,
     }
 
@@ -101,6 +115,7 @@ function LoginWindow:New(obj)
     }
     obj.new_pass_label = Chili.Label:New {
         parent = reg_grid,
+        passwordInput = true,
         caption = "Password ",
     }
     obj.new_pass = Chili.EditBox:New {
@@ -149,12 +164,20 @@ function LoginWindow:New(obj)
     obj.reg_ok.win = obj
     obj.reg_cancel.win = obj
 
-    -- Create a window to insert the verification code
-    obj.vcode_win = VerificationCodeWindow:New({parent = WG.Chili.Screen0}, obj)
-    obj.vcode_win:Hide()
-
     -- Hiden by default
     obj:Hide()
+
+    -- Events
+    log_win = obj
+    local lobby = WG.LibLobby.lobby
+    lobby:AddListener("OnRegistrationAccepted",
+        function(listener)
+            log_win.user.text = log_win.new_user.text
+            log_win.pass.text = log_win.new_pass.text
+            log_win.tabs:ChangeTab("Login")
+            Login(log_win.log_ok)
+        end
+    )
 
     return obj
 end 

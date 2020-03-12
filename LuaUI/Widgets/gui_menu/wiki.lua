@@ -103,8 +103,8 @@ function ParseFaction(faction)
         horizontalScrollbar = false,
     }
 
-    grid.BorderTileImage = ":c:empty.png"
-    grid.BackgroundTileImage = ":c:empty.png"
+    grid.BorderTileImage = ":cl:empty.png"
+    grid.BackgroundTileImage = ":cl:empty.png"
 
     local fontsize = 14
     local dw = obj.padding[1] + obj.padding[3]
@@ -143,8 +143,8 @@ function ParseUnit(unitDef)
         height = h,
         horizontalScrollbar = false,
     }
-    scroll.BorderTileImage = ":c:empty.png"
-    scroll.BackgroundTileImage = ":c:empty.png"
+    scroll.BorderTileImage = ":cl:empty.png"
+    scroll.BackgroundTileImage = ":cl:empty.png"
 
     --[[
     local grid = Chili.StackPanel:New {
@@ -285,7 +285,7 @@ function UnitsTreeWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    obj.TileImage = ":c:empty.png"
+    obj.TileImage = ":cl:empty.png"
 
     obj = UnitsTreeWindow.inherited.New(self, obj)
 
@@ -334,8 +334,8 @@ function UnitsTreeWindow:New(obj)
         width = '100%',
         height = '100%',
     }
-    scroll.BorderTileImage = ":c:empty.png"
-    scroll.BackgroundTileImage = ":c:empty.png"
+    scroll.BorderTileImage = ":cl:empty.png"
+    scroll.BackgroundTileImage = ":cl:empty.png"
 
     local tree = Chili.TreeView:New {
         parent = scroll,

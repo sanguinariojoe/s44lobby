@@ -4,6 +4,8 @@ VerificationCodeWindow = Chili.Window:Inherit{
     drawcontrolv2 = true
 }
 
+vcode_win = nil
+
 --//=============================================================================
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
@@ -12,49 +14,70 @@ VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 
 function Cancel(self)
     local win = self.win
-    local parent = win.login_win
-
+    WG.LibLobby.lobby:Disconnect()
     win:Hide()
-    parent:Show()
 end
 
 function Ok(self)
     local win = self.win
 
-    local parent = win.login_win
-    -- Store the new user and password
-    WG.MENUOPTS.login_user = parent.new_user.text
-    WG.MENUOPTS.login_pass = parent.new_pass.text
-    -- Setup the login tab
-    parent.user.text = WG.MENUOPTS.login_user
-    parent.pass.text = WG.MENUOPTS.login_pass
-    -- Change to the login tab
-    WG.MENUOPTS.login_tab = "Login"
-    parent.tabs:ChangeTab("Login")
-
+    local vcode = win.vcode.text
     win:Hide()
-    parent:Show()
+
+    local lobby = WG.LibLobby.lobby
+    lobby:AddListener("OnDenied",
+        function(listener, reason)
+            Spring.Log("Menu", LOG.WARNING, reason)
+            lobby:RemoveListener("OnDenied", listener)
+            win:Show()
+        end
+    )
+    lobby:ConfirmAgreement(vcode)
 end
 
 function VerificationCodeWindow:New(obj, login_win)
     self.login_win = login_win
 
     obj.x = obj.x or '30%'
-    obj.y = obj.y or '30%'
+    obj.y = obj.y or '10%'
     obj.width = obj.width or '40%'
+    obj.height = obj.height or '80%'
     obj.resizable = false
     obj.draggable = false
 
     obj = VerificationCodeWindow.inherited.New(self, obj)
+
+    -- Agreement text
+    -- ==============
+    obj.scroll = Chili.ScrollPanel:New {
+        parent = obj,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = obj.height - 148,
+        horizontalScrollbar = false,
+        BorderTileImage = ":cl:empty.png",
+        BackgroundTileImage = ":cl:empty.png",
+    }
+    obj.agreement_text = ""
+    obj.agreement = Chili.TextBox:New {
+        parent = obj.scroll,
+        text = obj.agreement_text,
+        font = {size = fontsize},
+        x = "0%",
+        y = "0%",
+        width = "100%",
+    }
+
 
     -- Login fields
     -- ============
     local grid = Chili.Grid:New {
         parent = obj,
         x = '0%',
-        y = '0%',
+        y = obj.height - 148,
         width = '100%',
-        height = '100%',
+        height = 138,
         rows = 2,
         columns = 2,
     }
@@ -62,6 +85,8 @@ function VerificationCodeWindow:New(obj, login_win)
     obj.label = Chili.Label:New {
         parent = grid,
         caption = "Verification code ",
+        align    = "center",
+        valign   = "center",
     }
     obj.vcode = Chili.EditBox:New {
         parent = grid,
@@ -85,6 +110,31 @@ function VerificationCodeWindow:New(obj, login_win)
 
     -- Hiden by default
     obj:Hide()
+
+    -- Events
+    vcode_win = obj
+    local lobby = WG.LibLobby.lobby
+    lobby:AddListener("OnAgreement", 
+        function(listener, line)
+            vcode_win.agreement_text = vcode_win.agreement_text .. line .. "\n"
+        end
+    )
+    lobby:AddListener("OnAgreementEnd", 
+        function(listener)
+            vcode_win.agreement:Dispose()
+            vcode_win.agreement = Chili.TextBox:New {
+                parent = vcode_win.scroll,
+                text = vcode_win.agreement_text,
+                font = {size = fontsize},
+                x = "0%",
+                y = "0%",
+                width = "100%",
+            }
+            vcode_win.agreement.text = vcode_win.agreement_text
+            vcode_win.agreement_text = ""
+            vcode_win:Show()
+        end
+    )
 
     return obj
 end 
