@@ -88,7 +88,7 @@ function LobbyWindow:New(obj)
     obj.tabs:AddTab({name="Battle list",
                      children={BattlesWindow:New({parent=obj.tabs})}})
     obj.tabs:AddTab({name="Battle list2",
-                     children={BattlesWindow:New({parent=obj.tabs})}})
+                     children={}})
 
 
     -- Connection status label
