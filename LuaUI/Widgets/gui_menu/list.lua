@@ -137,9 +137,9 @@ function ListWidget:UpdateEntry(i, data)
 end
 
 function ListWidget:RemoveEntry(i)
-    self.entries[i].win:Dispose()
+    self.entries[i].widget:Dispose()
     for j = i + 1, #self.entries do
-        self.entries[j].win:SetPos(nil, self.entries[j].win.y - 32)
+        self.entries[j].widget:SetPos(nil, self.entries[j].widget.y - 32)
         self.entries[j - 1] = self.entries[j]
     end
     self.entries[#self.entries] = nil

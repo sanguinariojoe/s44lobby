@@ -15,7 +15,14 @@ local FitString = StringUtilities.GetTruncatedStringWithDotDot
 --//=============================================================================
 
 function Joined2Channel(obj, name)
-    local chat = ChatWindow:New({parent=nil, official_server=false})
+    x, y, w, h = obj.main_chat.x, obj.main_chat.y, obj.main_chat.width, obj.main_chat.height
+    local chat = ChatWindow:New({parent = nil,
+                                 x = x,
+                                 y = y,
+                                 width = w,
+                                 height = h,
+                                 chanName = name,
+                                 official_server = false})
     obj.chats:AddTab({name=FitString(name, obj.font, 128),
                       children={chat}})
 end
@@ -31,7 +38,9 @@ function ChatsWindow:New(obj)
 
     obj = ChatsWindow.inherited.New(self, obj)
 
-    local main_chat = ChatWindow:New({parent=nil, official_server=true})
+    obj.main_chat = ChatWindow:New({parent = nil,
+                                      chanName = name,
+                                      official_server = true})
     local main_name= FitString("Official Server", obj.font, 128)
     obj.chats = Chili.TabPanel:New {
         parent = obj,
@@ -39,7 +48,7 @@ function ChatsWindow:New(obj)
         y = '0%',
         width = '100%',
         height = '100%',
-        tabs = {{name = main_name, children = {main_chat}}},
+        tabs = {{name = main_name, children = {obj.main_chat}}},
     }
 
     -- Join the channels

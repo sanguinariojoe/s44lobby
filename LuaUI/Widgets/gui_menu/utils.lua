@@ -235,3 +235,14 @@ end
 function string.trim(str)
     return str:match'^()%s*$' and '' or str:match'^%s*(.*%S)'
 end
+
+function string.split(str, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t={}
+    for s in string.gmatch(str, "([^"..sep.."]+)") do
+        table.insert(t, s)
+    end
+    return t
+end
