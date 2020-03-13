@@ -12,6 +12,7 @@ VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/login.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/vcode.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/battles_list.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby/chats.lua")
 
 --//=============================================================================
 
@@ -87,10 +88,8 @@ function LobbyWindow:New(obj)
     obj.tabs.tabbar.minItemWidth = 128
     obj.tabs:AddTab({name="Battle list",
                      children={BattlesWindow:New({parent=obj.tabs})}})
-    obj.tabs:AddTab({name="Battle room",
-                     children={Chili.Window:New({parent=obj.tabs})}})
     obj.tabs:AddTab({name="Chat",
-                     children={Chili.Window:New({parent=obj.tabs})}})
+                     children={ChatsWindow:New({parent=obj.tabs})}})
 
 
     -- Connection status label

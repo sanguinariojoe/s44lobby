@@ -23,6 +23,10 @@ WG.MENUOPTS = {
     login_tab = "Register",
     login_user = "",
     login_pass = "",
+    channels = {{name="newbies", key=nil},
+                {name="main", key=nil},
+                {name="s44", key=nil},
+                {name="s44games", key=nil},},
 }
 
 function widget:Initialize()
@@ -67,13 +71,15 @@ end
 function widget:GetConfigData(data)
     return {
         login_tab  = WG.MENUOPTS.login_tab,
-        login_user  = WG.MENUOPTS.login_user,
-        login_pass  = WG.MENUOPTS.login_pass,
+        login_user = WG.MENUOPTS.login_user,
+        login_pass = WG.MENUOPTS.login_pass,
+        channels   = WG.MENUOPTS.channels,
     }
 end
 
 function widget:SetConfigData(data)
-    WG.MENUOPTS.login_tab     = data.login_tab or WG.MENUOPTS.login_tab
-    WG.MENUOPTS.login_user     = data.login_user or WG.MENUOPTS.login_user
-    WG.MENUOPTS.login_pass     = data.login_pass or WG.MENUOPTS.login_pass
+    WG.MENUOPTS.login_tab  = data.login_tab or WG.MENUOPTS.login_tab
+    WG.MENUOPTS.login_user = data.login_user or WG.MENUOPTS.login_user
+    WG.MENUOPTS.login_pass = data.login_pass or WG.MENUOPTS.login_pass
+    WG.MENUOPTS.channels   = data.channels or WG.MENUOPTS.channels
 end

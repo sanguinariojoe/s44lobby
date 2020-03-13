@@ -368,7 +368,7 @@ Interface.commands["TASSERVER"] = Interface._OnTASServer
 Interface.commandPattern["TASSERVER"] = "(%S+)%s+(%S+)%s+(%S+)%s+(%S+)"
 
 function Interface:_OnMOTD(message)
-	-- IGNORED
+	self:super("_OnMOTD", message)
 end
 Interface.commands["MOTD"] = Interface._OnMOTD
 Interface.commandPattern["MOTD"] = "([^\t]*)"

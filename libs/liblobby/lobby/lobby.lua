@@ -436,6 +436,10 @@ function Lobby:_OnSuggestedGameVersion(gameVersion)
 	self:_CallListeners("OnSuggestedGameVersion", gameVersion)
 end
 
+function Lobby:_OnMOTD(message)
+	self:_CallListeners("OnMOTD", message)
+end
+
 function Lobby:_OnAccepted(newName)
 	if self.status == "connecting" then
 		self.status = "connected"

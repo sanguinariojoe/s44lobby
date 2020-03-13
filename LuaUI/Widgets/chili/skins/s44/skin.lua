@@ -105,8 +105,10 @@ skin.editbox = {
 skin.textbox = {
   hintFont = table.merge({color = {1, 1, 1, 0.7}}, skin.general.font),
 
-  TileImageBK = ":cl:empty.png",
-  TileImageFG = ":cl:empty.png",
+  TileImageBK = ":cl:panel2_bg.png",
+  TileImageFG = ":cl:panel2_border.png",
+  -- TileImageBK = ":cl:empty.png",
+  -- TileImageFG = ":cl:empty.png",
   tiles       = {14, 14, 14, 14},
 
   borderColor     = {0.0, 0.0, 0.0, 0.0},
@@ -255,6 +257,7 @@ skin.line = {
 
 skin.tabbar = {
   padding = {3, 1, 1, 0},
+  minItemWidth = 128,
 }
 
 skin.tabbaritem = {
