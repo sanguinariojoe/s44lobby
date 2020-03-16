@@ -47,6 +47,7 @@ function LobbyWindow:New(obj)
         Restart()
     end
 
+    obj.classname = "LobbyWindow"
     obj.x = obj.x or '0%'
     obj.y = obj.y or '0%'
     obj.width = obj.width or '100%'

@@ -25,10 +25,10 @@ local header_widths = {'6%',
                        '25%',
                        '25%',
                        '25%'}
-local header_fontsizes = {28,
-                          28,
+local header_fontsizes = {24,
+                          24,
                           21,
-                          36,
+                          24,
                           21,
                           21,
                           21}

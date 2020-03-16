@@ -38,7 +38,7 @@ local function _CropChat(text)
     return string.sub(crop, index + 2)
 end
 
-local function _NewMessage(obj, author, msg)
+function NewMessage(obj, author, msg)
     local msg = _CompileMessage(obj, author, msg)
     local text = obj.chat.text:sub(1, obj.chat.text:len() - 4)
     local text = text .. msg .. '\n \n \n'
@@ -65,6 +65,21 @@ local function _FindUser(obj, userName)
     end
 
     return nil
+end
+
+local function _OnUser(self)
+    local obj = self.parent
+    while obj.classname ~= "ChatsWindow" do
+        obj = obj.parent
+        if obj == nil then
+            Spring.Log("Menu",
+                       LOG.ERROR,
+                       "Chat without ChatsWindow parent")
+            return
+        end
+    end
+
+    obj:JoinPrivate(self.user_data.userName, true)
 end
 
 function ChatWindow:New(obj)
@@ -139,6 +154,7 @@ function ChatWindow:New(obj)
                 local data = userTable
                 data.userName = userName
                 data.fields = {userName, }
+                data.OnClick = { _OnUser }
                 obj.users:AddEntry(data)
             end
         )
@@ -160,7 +176,7 @@ function ChatWindow:New(obj)
                 if obj.chanName ~= chanName then
                     return
                 end
-                _NewMessage(obj, author, topic)
+                NewMessage(obj, author, topic)
             end
         )
         lobby:AddListener("OnClients",
@@ -170,7 +186,10 @@ function ChatWindow:New(obj)
                 end
                 for _, c in ipairs(clients) do
                     if _FindUser(obj, c) == nil then
-                        data = {userName = c, fields = {c, }, }
+                        data = {userName = c,
+                                fields = {c, },
+                                OnClick = { _OnUser },
+                               }
                         obj.users:AddEntry(data)
                     end
                 end
@@ -181,7 +200,10 @@ function ChatWindow:New(obj)
                 if obj.chanName ~= chanName or _FindUser(obj, userName) ~= nil then
                     return
                 end
-                data = {userName = userName, fields = {userName, }, }
+                data = {userName = userName,
+                        fields = {userName, },
+                        OnClick = { _OnUser },
+                       }
                 obj.users:AddEntry(data)
             end
         )
@@ -190,7 +212,7 @@ function ChatWindow:New(obj)
                 if obj.chanName ~= chanName then
                     return
                 end
-                _NewMessage(obj, userName, message)
+                NewMessage(obj, userName, message)
             end
         )
         lobby:AddListener("OnSaidEx",
@@ -198,7 +220,7 @@ function ChatWindow:New(obj)
                 if obj.chanName ~= chanName then
                     return
                 end
-                _NewMessage(obj, userName, message)
+                NewMessage(obj, userName, message)
             end
         )
         -- Ask for past messages
@@ -213,7 +235,7 @@ function ChatWindow:New(obj)
                                 break
                             end
                         end
-                        _NewMessage(obj, v.userName, v.msg)
+                        NewMessage(obj, v.userName, v.msg)
                     end
                 end
             end
