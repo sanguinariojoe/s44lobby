@@ -339,6 +339,10 @@ function Lobby:SayPrivate(userName, message)
 	return self
 end
 
+function Lobby:GetChannelMessages(chanName, lastID)
+	return self
+end
+
 ------------------------
 -- MatchMaking commands
 ------------------------
@@ -1043,6 +1047,14 @@ end
 function Lobby:_OnSayServerMessage(message, sayTime)
 	self:_CallListeners("OnSayServerMessage", message, sayTime)
 end
+
+------------------------
+-- Other
+------------------------
+function Lobby:_OnJSON(data)
+	self:_CallListeners("OnJSON", data)
+end
+
 
 ------------------------
 -- MatchMaking commands

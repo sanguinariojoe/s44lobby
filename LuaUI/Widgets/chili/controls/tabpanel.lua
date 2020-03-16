@@ -87,6 +87,13 @@ function TabPanel:New(obj)
 	return obj
 end
 
+local function _CallChildrenListeners(self, eventname, ...)
+	local children = self.children
+	for _, child in ipairs(children) do
+		child:CallListeners(child[eventname], ...)
+	end
+end            
+
 function TabPanel:AddTab(tab, neverSwitchTab)
 	local switchToTab = (#self.tabbar.children == 0) and not neverSwitchTab
 		self.tabbar:AddChild(TabBarItem:New {
@@ -102,7 +109,9 @@ function TabPanel:AddTab(tab, neverSwitchTab)
 			y = 0,
 			right = 0,
 			bottom = 0,
-			children = tab.children
+			children = tab.children,
+			OnShow = { function(self) _CallChildrenListeners(self, "OnShow") end },
+			OnHide = { function(self) _CallChildrenListeners(self, "OnHide") end },
 		}
 		self.tabIndexMapping[tab.name] = tabFrame
 		self.currentTab:AddChild(tabFrame)

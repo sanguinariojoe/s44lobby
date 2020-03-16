@@ -60,6 +60,30 @@ local function _AddHeaderButton(parent, header)
     return button
 end
 
+local function _OnResize(obj, width, height)
+    width = obj.clientWidth  -- This is the good one
+
+    local x = 0
+    for i, h in ipairs(obj.headers) do
+        local w = h._givenBounds.width
+        if Chili.IsRelativeCoord(w) then
+            -- Hack to workaround the Chilim restrictions
+            h:SetPos(x, nil, Chili.ProcessRelativeCoord(w, width), nil)
+            h._givenBounds.width = w
+            -- Update also the entries
+            for _, e in ipairs(obj.entries) do
+                e.widget.labels[i]:SetPos(x, nil, h.width, nil)
+                local txt = tostring(e.fields[i])
+                if string.len(txt) > 5 then
+                    txt = FitString(txt, obj.font, h.width)
+                end
+                e.widget.labels[i]:SetCaption(txt)
+            end
+        end
+        x = x + h.width
+    end
+end
+
 function ListWidget:AddEntry(data)
     if #data.fields ~= #self.headers then
         Spring.Log("Menu",
@@ -83,6 +107,7 @@ function ListWidget:AddEntry(data)
         TileImageBK = ":cl:empty.png",
         caption = "",
         OnClick = data.OnClick,
+        user_data = data,
     }
 
     -- And inside the fields
@@ -125,7 +150,7 @@ function ListWidget:UpdateEntry(i, data)
     for j, f in ipairs(data.fields) do
         local txt = tostring(f)
         if string.len(txt) > 5 then
-            txt = FitString(tostring(txt), self.font, w)
+            txt = FitString(tostring(txt), self.font, widget.labels[j].width)
         end
         widget.labels[j]:SetCaption(txt)
     end    
@@ -144,6 +169,13 @@ function ListWidget:RemoveEntry(i)
     end
     self.entries[#self.entries] = nil
     self.list_win:Resize(nil, 32 * #self.entries)
+end
+
+function ListWidget:ClearEntries()
+    local n = #self.entries
+    for i = 1, n do
+        self:RemoveEntry(#self.entries)
+    end
 end
 
 function ListWidget:New(obj)
@@ -194,6 +226,8 @@ function ListWidget:New(obj)
     end
 
     _SortList(obj)
+
+    obj.OnResize = { _OnResize }
 
     return obj
 end

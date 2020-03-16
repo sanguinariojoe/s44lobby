@@ -343,6 +343,13 @@ function Interface:SayEx(chanName, message)
 	return self
 end
 
+function Interface:GetChannelMessages(chanName, lastID)
+	if lastID == nil then lastID = 0 end
+	self:super("GetChannelMessages", chanName, lastID)
+	self:_SendCommand(concat("GETCHANNELMESSAGES", chanName, lastID))
+	return self
+end
+
 function Interface:SayPrivate(userName, message)
 	self:super("SayPrivate", userName, message)
 	self:_SendCommand(concat("SAYPRIVATE", userName, message))
@@ -779,6 +786,18 @@ function Interface:_OnSayPrivate(userName, message)
 end
 Interface.commands["SAYPRIVATE"] = Interface._OnSayPrivate
 Interface.commandPattern["SAYPRIVATE"] = "(%S+)%s+(.*)"
+
+------------
+------------
+-- OTHER
+------------
+------------
+
+function Interface:_OnJSON(json_str)
+	self:super("_OnJSON", json.decode(json_str))
+end
+Interface.commands["JSON"] = Interface._OnJSON
+Interface.commandPattern["JSON"] = "([^\t]+)"
 
 ------------
 ------------

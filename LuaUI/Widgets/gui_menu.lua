@@ -23,10 +23,8 @@ WG.MENUOPTS = {
     login_tab = "Register",
     login_user = "",
     login_pass = "",
-    channels = {{name="newbies", key=nil},
-                {name="main", key=nil},
-                {name="s44", key=nil},
-                {name="s44games", key=nil},},
+    channels = {{name="s44", key=nil, lastID=nil, persistent=true,},
+                {name="s44games", key=nil, lastID=nil, persistent=true,},},
 }
 
 function widget:Initialize()

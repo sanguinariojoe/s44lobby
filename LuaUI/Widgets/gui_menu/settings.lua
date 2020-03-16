@@ -179,7 +179,6 @@ local function QualityChange(self, itemIdx)
     SetAutoButton(win)
     SetSettings(QUALITIES[name])
     for _,cmd in ipairs(QUALITY_WIDGETS[name]) do
-        Spring.Echo("***luaui " .. cmd)
         Spring.SendCommands({"luaui " .. cmd})
     end
 end

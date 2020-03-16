@@ -84,12 +84,11 @@ function LobbyWindow:New(obj)
         width = '100%',
         height = '100%',
         padding = {5, 5, 5, 5},
+        tabs = {
+            {name="Battle list", children={BattlesWindow:New({})}},
+            {name="Chat", children={ChatsWindow:New({})}},
+                },
     }
-    obj.tabs.tabbar.minItemWidth = 128
-    obj.tabs:AddTab({name="Battle list",
-                     children={BattlesWindow:New({parent=obj.tabs})}})
-    obj.tabs:AddTab({name="Chat",
-                     children={ChatsWindow:New({parent=obj.tabs})}})
 
 
     -- Connection status label
