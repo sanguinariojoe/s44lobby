@@ -35,7 +35,7 @@ local function _CropChat(text)
     if index == nil then
         return crop
     end
-    return string.sub(crop, index + 2)
+    return string.sub(crop, index + 1)
 end
 
 function NewMessage(obj, author, msg)
@@ -113,6 +113,7 @@ function ChatWindow:New(obj)
         width = '100%',
         height = '100%',
         text = "",
+        selectable = true,
     }
 
     Spring.SendCommands("unbind Any+enter chat")
