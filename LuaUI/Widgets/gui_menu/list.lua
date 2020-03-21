@@ -20,15 +20,17 @@ local function _SortList(obj)
     for i, entry in ipairs(obj.entries) do
         local key = entry.fields[math.abs(obj.order_id)]
         local index = i
-        if obj.order_id < 0 then
-            index = #obj.entries + 1 - i
-        end
         argsort[i] = {index, key}
     end
 
-    table.sort(argsort, function(a, b) return a[2] < b[2] end)
+    if obj.order_id < 0 then
+        table.sort(argsort, function(a, b) return a[2] < b[2] end)
+    else
+        table.sort(argsort, function(a, b) return a[2] > b[2] end)
+    end
+
     local new_entries = {}
-    for _, k in pairs(argsort) do
+    for i, k in ipairs(argsort) do
         obj.entries[k[1]].widget:SetPos(nil, 32 * #new_entries)
         new_entries[#new_entries + 1] = obj.entries[k[1]]
     end
@@ -125,7 +127,7 @@ function ListWidget:AddEntry(data)
             height = 32,
             width = w,
             caption = txt,
-            align   = "center",
+            align   = "left",
             valign  = "center",
         }
         widget.labels[i] = label
