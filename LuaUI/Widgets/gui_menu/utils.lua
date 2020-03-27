@@ -246,3 +246,24 @@ function string.split(str, sep)
     end
     return t
 end
+
+function math.randompassword(length)
+    local index, pw, rnd = 0, ""
+    local chars = {
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "abcdefghijklmnopqrstuvwxyz",
+        "0123456789",
+        "!\"#$%&'()*+,-./:;<=>?@[]^_{|}~"
+    }
+    repeat
+        index = index + 1
+        rnd = math.random(chars[index]:len())
+        if math.random(2) == 1 then
+            pw = pw .. chars[index]:sub(rnd, rnd)
+        else
+            pw = chars[index]:sub(rnd, rnd) .. pw
+        end
+        index = index % #chars
+    until pw:len() >= length
+    return pw
+end

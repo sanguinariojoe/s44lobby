@@ -13,6 +13,7 @@ VFS.Include("LuaUI/Widgets/gui_menu/lobby/login.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/vcode.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/battles_list.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/chats.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/dialogs/error.lua")
 
 --//=============================================================================
 
@@ -88,9 +89,8 @@ function LobbyWindow:New(obj)
         tabs = {
             {name="Battle list", children={BattlesWindow:New({})}},
             {name="Chat", children={ChatsWindow:New({})}},
-                },
+        },
     }
-
 
     -- Connection status label
     obj.status_label = Chili.Button:New {
@@ -100,7 +100,7 @@ function LobbyWindow:New(obj)
         width = '10%',
         height = '5%',        
         caption = "offline",
-        OnMouseUp = { OnStatus },
+        OnClick = { OnStatus },
     }
     obj.status_label.font.color = {1, 0.2, 0.2, 1}
 
@@ -113,7 +113,7 @@ function LobbyWindow:New(obj)
         height = '5%',
         caption = "Back",
         backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { Back },
+        OnClick = { Back },
     }
     obj.ok_button = ok
 
@@ -132,13 +132,15 @@ function LobbyWindow:New(obj)
         end
     )
     lobby:AddListener("OnDenied",
-        function(listener)
+        function(listener, reason)
             lobby_win.status_label.caption = "denied"
             lobby_win.status_label.font.color = {1, 0.2, 0.2, 1}
+            ErrorWindow:New({caption = "Login failed... " .. reason})
         end
     )
     lobby:AddListener("OnConnect",
         function(listener)
+            Spring.Echo("OnConnect")
             if lobby_win.status_label.caption ~= "connecting" then
                 return
             end
@@ -163,7 +165,8 @@ function LobbyWindow:New(obj)
     lobby:AddListener("OnDisconnected",
         function(listener, reason, intentional)
             if not intentional then
-                Spring.Log("Menu", LOG.WARNING, reason)
+                local txt = reason or ""
+                ErrorWindow:New({caption = "Disconnected... " .. txt})
             end
             lobby_win.status_label.caption = "offline"
             lobby_win.status_label.font.color = {1, 0.2, 0.2, 1}
@@ -179,7 +182,7 @@ function LobbyWindow:New(obj)
     )
     lobby:AddListener("OnRegistrationDenied",
         function(listener, reason)
-            Spring.Log("Menu", LOG.WARNING, reason)
+            ErrorWindow:New({caption = "Registration failed... " .. reason})
             lobby_win.status_label.caption = "denied"
             lobby_win.status_label.font.color = {1, 0.2, 0.2, 1}
             lobby_win.log_win.tabs:ChangeTab("Register")
@@ -218,7 +221,6 @@ function OnStatus(self)
         -- The connection failed, so we retry
         self.caption = "connecting"
         self.font.color = {1, 1, 0.6, 1}
-        -- lobby:Connect("springrts.com", "8200")
         lobby:Connect("springrts.com", "8200")
         return
     end

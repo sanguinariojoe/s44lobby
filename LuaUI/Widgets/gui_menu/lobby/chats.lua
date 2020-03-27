@@ -12,6 +12,7 @@ VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/chat.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/private.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/join_channel.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/dialogs/error.lua")
 local FitString = StringUtilities.GetTruncatedStringWithDotDot
 
 --//=============================================================================
@@ -191,6 +192,7 @@ function ChatsWindow:New(obj)
     )
     lobby:AddListener("OnJoinFailed",
         function(listener, chanName, reason)
+            ErrorWindow:New({caption = "Failed joining #" .. chanName .. "... " .. txt})
             -- Drop the channel from the list
             local new_channels = {}
             for _, c in ipairs(WG.MENUOPTS.channels) do

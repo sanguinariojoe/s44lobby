@@ -23,6 +23,7 @@ WG.MENUOPTS = {
     login_tab = "Register",
     login_user = "",
     login_pass = "",
+    script_password = "",
     channels = {{name="s44", key=nil, lastID=nil, persistent=true,},
                 {name="s44games", key=nil, lastID=nil, persistent=true,},},
 }
@@ -71,6 +72,7 @@ function widget:GetConfigData(data)
         login_tab  = WG.MENUOPTS.login_tab,
         login_user = WG.MENUOPTS.login_user,
         login_pass = WG.MENUOPTS.login_pass,
+        script_password = WG.MENUOPTS.script_password,
         channels   = WG.MENUOPTS.channels,
     }
 end
@@ -79,5 +81,6 @@ function widget:SetConfigData(data)
     WG.MENUOPTS.login_tab  = data.login_tab or WG.MENUOPTS.login_tab
     WG.MENUOPTS.login_user = data.login_user or WG.MENUOPTS.login_user
     WG.MENUOPTS.login_pass = data.login_pass or WG.MENUOPTS.login_pass
+    WG.MENUOPTS.script_password = data.script_password or WG.MENUOPTS.script_password
     WG.MENUOPTS.channels   = data.channels or WG.MENUOPTS.channels
 end

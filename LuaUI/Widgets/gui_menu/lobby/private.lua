@@ -11,7 +11,6 @@ local MAX_CHAT_LENGTH = 2500
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/list.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/chat.lua")
-local FitString = StringUtilities.GetTruncatedStringWithDotDot
 
 --//=============================================================================
 

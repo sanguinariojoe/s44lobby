@@ -8,6 +8,7 @@ BattlesWindow = Chili.Window:Inherit{
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/list.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/dialogs/password.lua")
 
 --//=============================================================================
 
@@ -56,9 +57,43 @@ function BattleFields(battle)
     }
 end
 
+local function _JoinBattle(battleID, password)
+    local password = password or ""
+    WG.MENUOPTS.script_password = math.randompassword(8)
+
+    WG.LibLobby.lobby:JoinBattle(battleID,
+                                 password,
+                                 WG.MENUOPTS.script_password)
+end
+
+local function _OnPassword(self)
+    local obj = self.parent
+    local battleID = obj.battleID
+    local password = obj.pass.text
+    obj:Dispose()
+    _JoinBattle(battleID, password)
+end
+
+local function _OnBattle(self)
+    obj = self.parent
+    local battleID = self.user_data.battleID
+
+    if self.user_data.passworded then
+        local pass_win = PasswordWindow:New({
+            battleID = battleID,
+            OnClick = { _OnPassword },
+        })
+        pass_win:Show()
+        return
+    end
+
+    _JoinBattle(battleID)
+end
+
 function AddBattle(list_widget, battleID)
     local battle = WG.LibLobby.lobby:GetBattle(battleID)
     battle.fields = BattleFields(battle)
+    battle.OnClick = { _OnBattle }
     list_widget:AddEntry(battle)
 end
 
@@ -145,6 +180,9 @@ function BattlesWindow:New(obj)
             RemoveBattle(obj.battles_list, battleID)
         end
     )
+
+    -- Create a random seed for the random passwords generation
+    math.randomseed(os.time())
 
     return obj
 end 
