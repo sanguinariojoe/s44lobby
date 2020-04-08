@@ -13,6 +13,7 @@ end
 
 local unbinds = {
     -- "f11",
+    "Any+enter",
     "Shift+esc",
 }
 

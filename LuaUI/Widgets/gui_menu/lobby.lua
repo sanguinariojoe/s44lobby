@@ -13,6 +13,7 @@ VFS.Include("LuaUI/Widgets/gui_menu/lobby/login.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/vcode.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/battles_list.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/lobby/chats.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/lobby/battle_room.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/dialogs/error.lua")
 
 --//=============================================================================
@@ -89,6 +90,7 @@ function LobbyWindow:New(obj)
         tabs = {
             {name="Battle list", children={BattlesWindow:New({})}},
             {name="Chat", children={ChatsWindow:New({})}},
+            {name="Battle room", children={BattleRoomWindow:New({})}},
         },
     }
 

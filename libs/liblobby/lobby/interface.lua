@@ -1333,7 +1333,10 @@ Interface.commandPattern["REMOVESTARTRECT"] = "(%d+)"
 
 function Interface:_OnRequestBattleStatus()
 	self._requestedBattleStatus = true
-	self:SetBattleStatus({})
+	local userName = self:GetMyUserName()
+	local status = self.userBattleStatus[userName]
+	self:SetBattleStatus({isSpectator = false, isReady = true})
+	self:_CallListeners("OnUpdateUserBattleStatus", userName, status)
 end
 Interface.commands["REQUESTBATTLESTATUS"] = Interface._OnRequestBattleStatus
 

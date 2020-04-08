@@ -57,7 +57,7 @@ local function _ChatInput(self, key, mods, isRepeat, label, unicode, ...)
     WG.LibLobby.lobby:Say(self.parent.chanName, text)
 end
 
-local function _FindUser(obj, userName)
+function FindUser(obj, userName)
     for i, e in ipairs(obj.users.entries) do
         if e.userName == userName then
             return i
@@ -116,7 +116,6 @@ function ChatWindow:New(obj)
         selectable = true,
     }
 
-    Spring.SendCommands("unbind Any+enter chat")
     obj.chat_input = Chili.EditBox:New {
         parent = obj,
         x = '0%',
@@ -161,7 +160,7 @@ function ChatWindow:New(obj)
         )
         lobby:AddListener("OnRemoveUser",
             function(listener, userName)
-                local i = _FindUser(obj, userName)
+                local i = FindUser(obj, userName)
                 if i == nil then
                     Spring.Log("Menu",
                                LOG.ERROR,
@@ -186,7 +185,7 @@ function ChatWindow:New(obj)
                     return
                 end
                 for _, c in ipairs(clients) do
-                    if _FindUser(obj, c) == nil then
+                    if FindUser(obj, c) == nil then
                         data = {userName = c,
                                 fields = {c, },
                                 OnClick = { _OnUser },
@@ -198,7 +197,7 @@ function ChatWindow:New(obj)
         )
         lobby:AddListener("OnJoined",
             function(listener, chanName, userName)
-                if obj.chanName ~= chanName or _FindUser(obj, userName) ~= nil then
+                if obj.chanName ~= chanName or FindUser(obj, userName) ~= nil then
                     return
                 end
                 data = {userName = userName,

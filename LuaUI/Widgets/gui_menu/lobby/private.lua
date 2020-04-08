@@ -75,7 +75,6 @@ function PrivateChatWindow:New(obj)
         text = "",
     }
 
-    Spring.SendCommands("unbind Any+enter chat")
     obj.chat_input = Chili.EditBox:New {
         parent = obj,
         x = '0%',
