@@ -1,11 +1,12 @@
 local Chili = WG.Chili
-local IconsFolder = "LuaUI/Widgets/gui_menu/rsrc/"
 
 BattleRoomWindow = Chili.Window:Inherit{
     drawcontrolv2 = true
 }
 
-local MAX_CHAT_LENGTH = 2500
+battleroom_win = nil
+ICONS_FOLDER = "LuaUI/Widgets/gui_menu/rsrc/"
+MINIMAPS_FOLDER = "s44lobby/minimaps/"
 
 --//=============================================================================
 
@@ -88,6 +89,98 @@ local function _OnSpec(self)
     end
 end
 
+local function _SetMinimap(obj)
+    local lobby = WG.LibLobby.lobby
+    local battle = lobby:GetBattle(lobby:GetMyBattleID())
+    local minimap_folder = MINIMAPS_FOLDER .. battle.mapName
+    local minimap_file = minimap_folder .. "/minimap.png"
+    if not VFS.FileExists(minimap_file) then
+        WG.GetMinimap(battle.mapName, minimap_folder)
+    end
+    obj.map.file = minimap_file
+end
+
+local function _CheckDownload(name, category)
+    local lobby = WG.LibLobby.lobby
+    local battle = lobby:GetBattle(lobby:GetMyBattleID())
+    if category == "engine" then
+        return name == battle.engineName .. " " .. battle.engineVersion
+    elseif category == "game" then
+        return name == battle.gameName
+    elseif category == "map" then
+        return name == battle.mapName
+    else
+        return false
+    end
+end
+
+local function _OnDownloadProgress(name, category, progress)
+    if not _CheckDownload(name, category) then
+        return
+    end
+
+    local obj = battleroom_win
+    if progress == 0 then
+        return
+    end
+    obj.download_progress[category] = progress
+    local total_progress, n = 0, 0
+    for _, p in pairs(obj.download_progress) do
+        total_progress = total_progress + p
+        n = n + 1
+    end
+    total_progress = math.floor(100.0 * total_progress / n)
+    obj.download:SetValue(total_progress)
+    if obj.download.caption ~= "Failed" then
+        obj.download:SetCaption(tostring(total_progress) .. "%")
+    end
+end
+
+local function _OnDownloadFailed(name, category)
+    if not _CheckDownload(name, category) then
+        return
+    end
+
+    local obj = battleroom_win
+    Spring.Log("Menu",
+               LOG.ERROR,
+               "Failure downloading " .. category .. " '" .. name .. "'")
+    obj.download:SetCaption("Failed")
+end
+
+local function _OnDownloadFinished(name, category)
+    if not _CheckDownload(name, category) then
+        return
+    end
+
+    local obj = battleroom_win
+    obj.download_progress[category] = 1.0
+    local progress, n = 0, 0
+    for _, p in pairs(obj.download_progress) do
+        progress = progress + p
+        n = n + 1
+    end
+    progress = math.floor(100.0 * progress / n + 0.5)
+    if progress >= 100 then
+        obj.download:SetCaption("Finished")
+        obj.download:Hide()
+        _SetMinimap(obj)
+    end
+end
+
+local function _Download(name, category)
+    local obj = battleroom_win
+    obj.download_progress[category] = 0
+    obj.map.file = ICONS_FOLDER .. "download_icon.png"
+    obj.download:SetValue(0)
+    obj.download:SetCaption("0%")
+    obj.download:Show()
+    WG.DownloadArchive(name, category, {
+        DownloadProgress = _OnDownloadProgress,
+        DownloadFailed = _OnDownloadFailed,
+        DownloadFinished = _OnDownloadFinished})
+end
+
 function BattleRoomWindow:New(obj)
     obj.x = obj.x or '0%'
     obj.y = obj.y or '0%'
@@ -98,6 +191,7 @@ function BattleRoomWindow:New(obj)
     obj.TileImage = ":cl:empty.png"
     obj.padding = obj.padding or {0, 0, 0, 0}
     obj.classname = "BattleRoomWindow"
+    obj.download_progress = {}
     -- Auto-unspec status:
     -- 0 = Don't do anything
     -- 1 = Try to unspec
@@ -111,16 +205,30 @@ function BattleRoomWindow:New(obj)
         x = '0%',
         y = '0%',
         width = '20%',
-        height = '20%',
-        file = IconsFolder .. "download_icon.png",
+        height = '30%',
+        file = ICONS_FOLDER .. "download_icon.png",
     }
+
+    -- Download progress bar that would replace the image while working
+    obj.download = Chili.Progressbar:New {
+        parent = obj.map,
+        x = '0%',
+        y = '40%',
+        width = '100%',
+        height = '20%',
+        value = 0,
+        caption = "0%",
+        color = {1,1,0.6,1},
+        backgroundColor = {0.05,0.05,0.05,0.5},
+    }
+    obj.download:Hide()
 
     obj.mod_opts = ListWidget:New {
         parent = obj,
         x = '0%',
-        y = '20%',
+        y = '30%',
         width = '20%',
-        height = '80%',
+        height = '70%',
         headers = {{
             caption = 'Option',
             width = '50%',
@@ -206,7 +314,19 @@ function BattleRoomWindow:New(obj)
             obj.spec_button:SetCaption("Joining")
 
             local battle = lobby:GetBattle(battleID)
-            local map = battle.mapName
+            obj.download_progress = {}
+            local engineName = battle.engineName .. " " .. battle.engineVersion
+            if not VFS.HasArchive(engineName) then
+                -- TODO: For the time being this is always happening... A
+                -- reliable way to look for available engines is required
+                _Download(engineName, "engine")
+            end
+            if not VFS.HasArchive(battle.gameName) then
+                _Download(battle.gameName, "game")
+            end
+            if not VFS.HasArchive(battle.mapName) then
+                _Download(battle.mapName, "map")
+            end
 
             _changeTab(obj)
 
@@ -222,6 +342,27 @@ function BattleRoomWindow:New(obj)
             end
 
             obj.chat:SetText("")
+        end
+    )
+    lobby:AddListener("OnUpdateBattleInfo",
+        function(listener, battleID)
+            if battleID ~= lobby:GetMyBattleID() then
+                return
+            end
+            local battle = lobby:GetBattle(battleID)
+            obj.download_progress = {}
+            local engineName = battle.engineName .. " " .. battle.engineVersion
+            if not VFS.HasArchive(engineName) then
+                -- TODO: For the time being this is always happening... A
+                -- reliable way to look for available engines is required
+                _Download(engineName, "engine")
+            end
+            if not VFS.HasArchive(battle.gameName) then
+                _Download(battle.gameName, "game")
+            end
+            if not VFS.HasArchive(battle.mapName) then
+                _Download(battle.mapName, "map")
+            end
         end
     )
     lobby:AddListener("OnJoinedBattle",
@@ -241,7 +382,6 @@ function BattleRoomWindow:New(obj)
     )
     lobby:AddListener("OnUpdateUserBattleStatus",
         function(listener, userName, status)
-            Spring.Echo("OnUpdateUserBattleStatus", userName, status.isSpectator)
             local i = FindUser(obj, userName)
             if i == nil then
                 return
@@ -292,10 +432,11 @@ function BattleRoomWindow:New(obj)
                     OnClick = nil,
                 }
                 obj.mod_opts:AddEntry(entry)
-                Spring.Echo("OnSetModOptions", k, v)
             end
         end
     )
+
+    battleroom_win = obj
 
     return obj
 end

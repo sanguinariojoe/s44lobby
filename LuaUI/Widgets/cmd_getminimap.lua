@@ -14,11 +14,29 @@ local USE_MIPMAPS = false
 local bit = VFS.Include("libs/luabit/bit.lua", nil, VFS.RAW_FIRST)
 local shader = nil
 local pending = {}
+local mapnames = {}
+
+local function _inspect_mapname(map)
+    local info
+    if not VFS.FileExists("mapinfo.lua") then
+        return ""
+    end
+
+    info = VFS.Include("mapinfo.lua")
+    local name = info.name
+    if info.version then
+        name = name .. " " .. info.version
+    end
+
+    return name
+end
 
 local function _find_map(map)
     local maps = VFS.GetMaps()
+    local candidate = nil
+    local score = 0
     for _, m in ipairs(maps) do
-        -- First check if it is already a map name
+        -- First check if it is already a straight map name
         if m:lower() == map:lower() then
             return m
         end
@@ -28,6 +46,13 @@ local function _find_map(map)
             path = path:sub(path:len() - map:len() + 1)
         end
         if path == map then
+            return m
+        end
+        -- Try to look inside the map file
+        if mapnames[m] == nil then
+            mapnames[m] = VFS.UseArchive(m, _inspect_mapname)
+        end
+        if mapnames[m] ~= "" and mapnames[m] == map then
             return m
         end
     end
@@ -166,7 +191,8 @@ local function _extract_minimap(hdr, data, folder)
 
     -- Add it to the list of pending conversions
     pending[#pending + 1] = {fi = folder .. "/minimap.dds",
-                             fo = folder .. "/minimap.png",}
+                             fo = folder .. "/minimap.png",
+                             aspect = hdr.mapy / hdr.mapx}
 end
 
 local function _decompile_map(map, folder)
@@ -259,7 +285,14 @@ function widget:DrawScreenEffects()
     Spring.Echo("Converting " .. pending[#pending].fi .. " -> " .. pending[#pending].fo)
 
     local textinfo = gl.TextureInfo(pending[#pending].fi)
-    local output = output or gl.CreateTexture(textinfo.xsize, textinfo.ysize, {
+    local xsize, ysize = textinfo.xsize, textinfo.ysize
+    local aspect = pending[#pending].aspect
+    if aspect > 1 then
+        xsize = math.floor(xsize / aspect + 0.5)        
+    else
+        ysize = math.floor(ysize * aspect + 0.5)
+    end
+    local output = output or gl.CreateTexture(xsize, ysize, {
         fbo = true, min_filter = GL.LINEAR, mag_filter = GL.LINEAR,
         wrap_s = GL.CLAMP, wrap_t = GL.CLAMP,
     })
@@ -277,7 +310,10 @@ function widget:DrawScreenEffects()
         gl.Texture(0, false)
     gl.UseShader(0)
 
-    gl.RenderToTexture(output, gl.SaveImage, 0, 0, textinfo.xsize, textinfo.ysize, pending[#pending].fo)
+    gl.Texture(output)
+    gl.RenderToTexture(output, gl.SaveImage, 0, 0, xsize, ysize, pending[#pending].fo)
+    gl.Texture(false)
+
     gl.DeleteTexture(output)
     gl.DeleteTexture(pending[#pending].fi)
 

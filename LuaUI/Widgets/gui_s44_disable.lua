@@ -12,7 +12,7 @@ function widget:GetInfo()
 end
 
 local unbinds = {
-    -- "f11",
+    "f11",
     "Any+enter",
     "Shift+esc",
 }
