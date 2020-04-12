@@ -26,6 +26,7 @@ WG.MENUOPTS = {
     script_password = "",
     channels = {{name="s44", key=nil, lastID=nil, persistent=true,},
                 {name="s44games", key=nil, lastID=nil, persistent=true,},},
+    wiki_unit = "gerpanzeriii",
 }
 
 function widget:Initialize()
@@ -74,6 +75,7 @@ function widget:GetConfigData(data)
         login_pass = WG.MENUOPTS.login_pass,
         script_password = WG.MENUOPTS.script_password,
         channels   = WG.MENUOPTS.channels,
+        wiki_unit  = WG.MENUOPTS.wiki_unit,
     }
 end
 
@@ -83,4 +85,5 @@ function widget:SetConfigData(data)
     WG.MENUOPTS.login_pass = data.login_pass or WG.MENUOPTS.login_pass
     WG.MENUOPTS.script_password = data.script_password or WG.MENUOPTS.script_password
     WG.MENUOPTS.channels   = data.channels or WG.MENUOPTS.channels
+    WG.MENUOPTS.wiki_unit  = data.wiki_unit or WG.MENUOPTS.wiki_unit
 end

@@ -19,6 +19,8 @@ sortieDefs = include("LuaRules/Configs/sortie_defs.lua")
 --//=============================================================================
 
 UNITS = {}  -- Global list of units already added to the tree
+local selected_unit = nil
+
 
 local function __split_str(inputstr, sep)
     if sep == nil then
@@ -212,6 +214,7 @@ function NodeSelected(self, node)
     end
 
     if node.children[1].unitDef ~= nil then
+        WG.MENUOPTS.wiki_unit = node.children[1].unitDef.name
         ParseUnit(node.children[1].unitDef)
         return
     end    
@@ -326,6 +329,7 @@ function UnitsTreeWindow:New(obj)
             data[#data + 1] = {obj, tree}
         end
     end
+    ParseUnit(UnitDefNames[WG.MENUOPTS.wiki_unit:lower()])
 
     local scroll = Chili.ScrollPanel:New {
         parent = subwin,
@@ -365,4 +369,5 @@ end
 function UnitsTreeWindow:Show(visitor)
     self.visitor = visitor
     UnitsTreeWindow.inherited.Show(self)
+    ParseUnit(UnitDefNames[WG.MENUOPTS.wiki_unit:lower()])
 end
