@@ -13,10 +13,10 @@ end
 local USE_MIPMAPS = false
 local bit = VFS.Include("libs/luabit/bit.lua", nil, VFS.RAW_FIRST)
 local shader = nil
-local pending = {}
+local dds2png = {}
 local mapnames = {}
 
-local function _inspect_mapname(map)
+local function _inspect_mapname()
     local info
     if not VFS.FileExists("mapinfo.lua") then
         return ""
@@ -28,6 +28,16 @@ local function _inspect_mapname(map)
         name = name .. " " .. info.version
     end
 
+    return name
+end
+
+local function _inspect_mapname_wrapper(map)
+    -- Apparently VFS.UseArchive lead to spring engine crashes, so better just
+    -- simply mapping and unmapping the resources
+    -- return VFS.UseArchive(map, _inspect_mapname)
+    VFS.MapArchive(map)
+    local name = _inspect_mapname()
+    VFS.UnmapArchive(map)
     return name
 end
 
@@ -50,7 +60,7 @@ local function _find_map(map)
         end
         -- Try to look inside the map file
         if mapnames[m] == nil then
-            mapnames[m] = VFS.UseArchive(m, _inspect_mapname)
+            mapnames[m] = _inspect_mapname_wrapper(m)
         end
         if mapnames[m] ~= "" and mapnames[m] == map then
             return m
@@ -189,8 +199,8 @@ local function _extract_minimap(hdr, data, folder)
 
     out:close()
 
-    -- Add it to the list of pending conversions
-    pending[#pending + 1] = {fi = folder .. "/minimap.dds",
+    -- Add it to the list of dds2png conversions
+    dds2png[#dds2png + 1] = {fi = folder .. "/minimap.dds",
                              fo = folder .. "/minimap.png",
                              aspect = hdr.mapy / hdr.mapx}
 end
@@ -211,6 +221,16 @@ local function _decompile_map(map, folder)
     return true
 end
 
+local function _decompile_map_wrapper(map, folder)
+    -- Apparently VFS.UseArchive lead to spring engine crashes, so better just
+    -- simply mapping and unmapping the resources
+    -- return VFS.UseArchive(map, _decompile_map, map, folder)
+    VFS.MapArchive(map)
+    local success = _decompile_map(map, folder)
+    VFS.UnmapArchive(map)
+    return success
+end
+
 function GetMinimap(map, folder)
     folder = folder or map .. ".decompiled"
 
@@ -220,7 +240,7 @@ function GetMinimap(map, folder)
         return false
     end
 
-    local success = VFS.UseArchive(mapname, _decompile_map, mapname, folder)
+    local success = _decompile_map_wrapper(mapname, folder)
     if not success then
         if success == nil then
             Spring.Log("GetMinimap", LOG.ERROR,
@@ -277,16 +297,27 @@ function widget:Initialize()
     widgetHandler:AddAction("getminimap", GetMinimapCmd)
 end
 
-function widget:DrawScreenEffects()
-    if shader == nil or #pending == 0 then
+function widget:Update()
+    -- Look for untracked maps
+    local maps = VFS.GetMaps()
+    for _, m in ipairs(maps) do
+        if mapnames[m] == nil then
+            mapnames[m] = _inspect_mapname_wrapper(m)
+            return
+        end
+    end
+end
+
+function widget:DrawGenesis()
+    if shader == nil or #dds2png == 0 then
         return
     end
 
-    Spring.Echo("Converting " .. pending[#pending].fi .. " -> " .. pending[#pending].fo)
+    Spring.Echo("Converting " .. dds2png[#dds2png].fi .. " -> " .. dds2png[#dds2png].fo)
 
-    local textinfo = gl.TextureInfo(pending[#pending].fi)
+    local textinfo = gl.TextureInfo(dds2png[#dds2png].fi)
     local xsize, ysize = textinfo.xsize, textinfo.ysize
-    local aspect = pending[#pending].aspect
+    local aspect = dds2png[#dds2png].aspect
     if aspect > 1 then
         xsize = math.floor(xsize / aspect + 0.5)        
     else
@@ -303,7 +334,7 @@ function widget:DrawScreenEffects()
     end
 
     gl.UseShader(shader)
-        gl.Texture(0, pending[#pending].fi)
+        gl.Texture(0, dds2png[#dds2png].fi)
 
         gl.RenderToTexture(output, gl.TexRect, -1, 1, 1, -1)
 
@@ -311,11 +342,11 @@ function widget:DrawScreenEffects()
     gl.UseShader(0)
 
     gl.Texture(output)
-    gl.RenderToTexture(output, gl.SaveImage, 0, 0, xsize, ysize, pending[#pending].fo)
+    gl.RenderToTexture(output, gl.SaveImage, 0, 0, xsize, ysize, dds2png[#dds2png].fo)
     gl.Texture(false)
 
     gl.DeleteTexture(output)
-    gl.DeleteTexture(pending[#pending].fi)
+    gl.DeleteTexture(dds2png[#dds2png].fi)
 
-    pending[#pending] = nil
+    dds2png[#dds2png] = nil
 end
