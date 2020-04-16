@@ -1,5 +1,8 @@
 local Chili = WG.Chili
 local IconsFolder = "LuaUI/Widgets/gui_menu/rsrc/"
+squadDefs = include("LuaRules/Configs/squad_defs.lua")
+sortieDefs = include("LuaRules/Configs/sortie_defs.lua")
+morphDefs = include("LuaRules/Configs/morph_defs.lua")
 
 function _create_description(parent, unitDef, fontsize, header, y)
     txt = header .. '\n'
@@ -1292,26 +1295,42 @@ end
 function _squad_children(unitDef)
     if squadDefs[unitDef.name] == nil and sortieDefs[unitDef.name] == nil then
         -- Not a squad
-        return nil
+        return {}
     end
     local squad = squadDefs[unitDef.name] or sortieDefs[unitDef.name]
     local members = {}
-    local member, n
+    local member
     for _, member in pairs(squad.members) do
-        if members[member] == nil then
-            members[member] = 1
+        if members[member:lower()] == nil then
+            members[member:lower()] = 1
         else
-            members[member] = members[member] + 1
+            members[member:lower()] = members[member:lower()] + 1
         end
     end
     return members
+end
+
+function _morph_children(unitDef)
+    if morphDefs[unitDef.name] == nil then
+        return {}
+    end
+    local morphs = {}
+    local morph
+    if morphDefs[unitDef.name].into ~= nil then
+        morphs[#morphs + 1] = morphDefs[unitDef.name].into:lower()
+    else
+        for _, morph in ipairs(morphDefs[unitDef.name]) do
+            morphs[#morphs + 1] = morph.into:lower()
+        end
+    end
+    return morphs
 end
 
 function _parse_squad(parent, unitDef, fontsize)
     local y = 0
 
     local members = _squad_children(unitDef)
-    if members == nil then
+    if #members == 0 then
         return 0
     end
 

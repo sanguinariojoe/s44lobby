@@ -13,8 +13,6 @@ local XS, YS, ZS, HS = 9000, 0, 1200, 450
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/wiki_parsers.lua")
-squadDefs = include("LuaRules/Configs/squad_defs.lua")
-sortieDefs = include("LuaRules/Configs/sortie_defs.lua")
 
 --//=============================================================================
 
@@ -228,6 +226,13 @@ function _unit_node(name)
     return obj
 end
 
+function table.has(table, value)
+    for _, v in ipairs(table) do
+        if value == v then return true end
+    end
+    return false
+end
+
 function _units_tree(startUnit, side)
     -- Departs from the starting unit, and traverse all the tech tree derived
     -- from him, simply following the building capabilities of each unit.
@@ -238,7 +243,14 @@ function _units_tree(startUnit, side)
     local tree = {}
 
     -- Get the children
-    local children = unitDef.buildOptions
+    local children = {}
+    local tmpchildren = unitDef.buildOptions
+    for _, child in ipairs(tmpchildren) do
+        if not table.has(children, child) then
+            children[#children + 1] = _unit_name(child, side):lower()
+        end
+    end
+
     if name == side .. "pontoontruck" then
         -- The factories transformations are added as morphing links build
         -- options. However, the pontoontruck morph to shipyard is not specified
@@ -246,29 +258,33 @@ function _units_tree(startUnit, side)
         children[#children + 1] = side .. "boatyard"
     end
 
-    -- Add also the squad/sortie members as children
-    local members = _squad_children(unitDef)
-    if members ~= nil then
-        for member, _ in pairs(members) do
-            children[#children + 1] = member
+    -- Add the morph options
+    tmpchildren = _morph_children(unitDef)
+    for _, child in ipairs(tmpchildren) do
+        if not table.has(children, child) then
+            children[#children + 1] = child
         end
+    end
+
+    -- Add also the squad/sortie members as children
+    tmpchildren = _squad_children(unitDef)
+    for child, _ in pairs(tmpchildren) do
+        children[#children + 1] = child
     end
 
     -- We want to get each unit, and its subtree, parsed as soon as possible.
     -- However, we don't want to parse each unit subtree more than once, so we
     -- are keeping a local record of the units we must parse here
     local parsed = {}
-    for i = 1,#children do
-        name = _unit_name(children[i], side)
+    for i, name in ipairs(children) do
         parsed[i] = UNITS[name] ~= nil
         UNITS[name] = unitDef.humanName
     end
 
     -- Now we can add the entities
-    for i = 1,#children do
-        name = _unit_name(children[i], side)
+    for i, name in ipairs(children) do
         -- We always want to traverse the squad/sortie members again
-        if parsed[i] and (_squad_children(UnitDefNames[name]) == nil) then
+        if parsed[i] and (#_squad_children(UnitDefNames[name]) == 0) then
             tree[#tree + 1] = _unit_node(name)
         else
             subobj, subtree = _units_tree(name, side)
