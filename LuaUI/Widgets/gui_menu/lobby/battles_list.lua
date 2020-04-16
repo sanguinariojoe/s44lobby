@@ -61,9 +61,11 @@ local function _JoinBattle(battleID, password)
     local password = password or ""
     WG.MENUOPTS.script_password = math.randompassword(8)
 
-    WG.LibLobby.lobby:JoinBattle(battleID,
-                                 password,
-                                 WG.MENUOPTS.script_password)
+    local lobby = WG.LibLobby.lobby
+    if lobby:GetMyBattleID() ~= nil then
+        lobby:LeaveBattle()
+    end
+    lobby:JoinBattle(battleID, password, WG.MENUOPTS.script_password)
 end
 
 local function _OnPassword(self)
@@ -165,6 +167,11 @@ function BattlesWindow:New(obj)
     )
     lobby:AddListener("OnJoinedBattle",
         function(listener, battleID, userName, scriptPassword)
+            UpdateBattle(obj.battles_list, battleID)
+        end
+    )
+    lobby:AddListener("OnLeftBattle",
+        function(listener, battleID, userName)
             UpdateBattle(obj.battles_list, battleID)
         end
     )

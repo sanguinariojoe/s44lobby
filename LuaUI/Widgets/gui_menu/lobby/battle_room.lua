@@ -103,6 +103,9 @@ end
 local function _CheckDownload(name, category)
     local lobby = WG.LibLobby.lobby
     local battle = lobby:GetBattle(lobby:GetMyBattleID())
+    if battle == nil then
+        return nil
+    end
     if category == "engine" then
         return name == battle.engineName .. " " .. battle.engineVersion
     elseif category == "game" then
@@ -378,6 +381,22 @@ function BattleRoomWindow:New(obj)
                 OnClick = nil,
             }
             obj.users:AddEntry(data)
+        end
+    )
+    lobby:AddListener("OnLeftBattle",
+        function(listener, battleID, userName)
+            if battleID ~= obj.battleID then
+                return
+            end
+
+            local i = FindUser(obj, userName)
+            if i == nil then
+                Spring.Log("Menu",
+                           LOG.WARNING,
+                           "Untracked user " .. userName .. " left the battle")
+                return
+            end
+            obj.users:RemoveEntry(i)
         end
     )
     lobby:AddListener("OnUpdateUserBattleStatus",
