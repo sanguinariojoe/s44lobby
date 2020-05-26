@@ -203,6 +203,11 @@ function LobbyWindow:New(obj)
             lobby_win.status_label.font.color = {1, 1, 0.6, 1}
         end
     )
+    lobby:AddListener("OnJoinBattleFailed",
+        function(listener, reason)
+            ErrorWindow:New({caption = "Fail joining battle... " .. reason})
+        end
+    )
 
     return obj
 end 

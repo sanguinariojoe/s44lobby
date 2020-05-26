@@ -217,6 +217,7 @@ function Lobby:RejoinBattle(battleID)
 end
 
 function Lobby:JoinBattle(battleID, password, scriptPassword)
+	self.scriptPassword = scriptPassword
 	return self
 end
 
@@ -254,27 +255,12 @@ end
 
 function Lobby:ConnectToBattle(useSpringRestart, battleIp, battlePort, clientPort, scriptPassword, myName, gameName, mapName, engineName, battleType)
 	if gameName and not VFS.HasArchive(gameName) then
-		WG.Chobby.InformationPopup("Cannont start game: missing game file '" .. gameName .. "'.")
+		Spring.Log(LOG_SECTION, "warning", "Cannont start game: missing game file '" .. gameName .. "'.")
 		return
 	end
 
 	if mapName and not VFS.HasArchive(mapName) then
-		WG.Chobby.InformationPopup("Cannont start game: missing map file '" .. mapName .. "'.")
-		return
-	end
-	local Config = WG.Chobby.Configuration
-
-	if engineName and (Config.multiplayerLaunchNewSpring or not Config:IsValidEngineVersion(engineName)) and not Config.useWrongEngine then
-		if WG.WrapperLoopback and WG.WrapperLoopback.StartNewSpring and WG.SettingsWindow and WG.SettingsWindow.GetSettingsString then
-			local params = {
-				StartScriptContent = GenerateScriptTxt(battleIp, battlePort, clientPort, scriptPassword, myName),
-				Engine = engineName,
-				SpringSettings = WG.SettingsWindow.GetSettingsString(),
-			}
-			WG.WrapperLoopback.StartNewSpring(params)
-		else
-			WG.Chobby.InformationPopup("Cannont start game: wrong Spring engine version. The required version is '" .. engineName .. "', your version is '" .. Spring.Utilities.GetEngineVersion() .. "'.", {width = 420, height = 260})
-		end
+		Spring.Log(LOG_SECTION, "warning", "Cannont start game: missing map file '" .. mapName .. "'.")
 		return
 	end
 
