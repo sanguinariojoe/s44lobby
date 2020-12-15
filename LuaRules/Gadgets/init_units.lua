@@ -16,9 +16,9 @@ if not gadgetHandler:IsSyncedCode() then
 end
 
 -- SYNCED
-local X, Y, Z = 9000, 14.5, 7615
-local XS, YS, ZS = 9000, 0, 1200
-local ALPHA = 60
+local X, Y, Z = 512, 14.5, 516
+local XS, YS, ZS = 512, 0, 820
+local ALPHA = 90
 local UNITNAME = "gerpanzerIII"
 local FLAGNAMES = {"flag", "buoy"}
 

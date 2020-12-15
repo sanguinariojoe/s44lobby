@@ -208,6 +208,12 @@ function LobbyWindow:New(obj)
             ErrorWindow:New({caption = "Fail joining battle... " .. reason})
         end
     )
+    lobby:AddListener("OnBattleAboutToStart",
+        function(listener, battleType)
+            -- Let know the game it was launched by the lobby
+            WG.LOBBY2GAME.launched_by_lobby = true
+        end
+    )
 
     return obj
 end 

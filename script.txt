@@ -7,7 +7,7 @@
 
 	ModHash=701207390;
 	MapHash=3454635687;
-	Mapname=1944 - Westerplatte 1.2;
+	Mapname=1944 - Lobby 1.0;
 	GameType=Spring: 1944 LOBBY;
 	GameStartDelay = 0;
 

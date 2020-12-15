@@ -10,9 +10,9 @@ function widget:GetInfo()
     }
 end
 
-WG.look_at_x = 8990
+WG.look_at_x = 512
 WG.look_at_y = 14
-WG.look_at_z = 7620
+WG.look_at_z = 516
 WG.look_height = 262
 
 local CAMERADATA = {

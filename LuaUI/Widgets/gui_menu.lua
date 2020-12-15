@@ -3,7 +3,7 @@ function widget:GetInfo()
         name = "Chili based menu",
         desc = "Let's configure the game, and join games",
         author = "Jose Luis Cercos-Pita",
-        date = "2019-05-22",
+        date = "2020-05-22",
         license = "GPL v2",
         layer = 0,
         experimental = false,
@@ -68,7 +68,7 @@ function widget:Initialize()
     main:Show()
 end
 
-function widget:GetConfigData(data)
+function widget:GetConfigData()
     return {
         login_tab  = WG.MENUOPTS.login_tab,
         login_user = WG.MENUOPTS.login_user,

@@ -6,8 +6,8 @@ UnitsTreeWindow = Chili.Window:Inherit{
 
 DescriptionWindow = nil
 
-local X, Y, Z, H = 9000, 14.5, 7615, 262
-local XS, YS, ZS, HS = 9000, 0, 1200, 450
+local X, Y, Z, H = 512, 14.5, 516, 262
+local XS, YS, ZS, HS = 512, 0, 820, 450
 
 --//=============================================================================
 
