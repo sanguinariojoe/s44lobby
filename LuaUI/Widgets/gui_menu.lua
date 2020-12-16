@@ -1,7 +1,7 @@
 function widget:GetInfo()
     return {
         name = "Chili based menu",
-        desc = "Let's configure the game, and join games",
+        desc = "You can use this menu to both play the game, and tweak settings",
         author = "Jose Luis Cercos-Pita",
         date = "2020-05-22",
         license = "GPL v2",

@@ -7,8 +7,6 @@ MainWindow = Chili.Window:Inherit{
 local this = MainWindow
 local inherited = this.inherited
 
---//=============================================================================
-
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 
 local function GoToLobby(self)
@@ -34,64 +32,58 @@ end
 
 --//=============================================================================
 
+function __AddButton(parent, caption, action, y, h)
+    y = y or 0
+    h = h or 0.2
+    local fontsize = Chili.OptimumFontSize(parent.font,
+                                           "Multiplayer",
+                                           0.8 * ((parent.width - 10) - 10),
+                                           0.6 * (h * (parent.height - 10) - 10))
+
+    if h <= 1.0 then
+        h = tostring(math.floor(100 * h)) .. "%"
+    end
+
+    return Chili.Button:New{
+        parent = parent,
+        x = "0%",
+        y = y,
+        width = "100%",
+        height = h,
+        padding = {0, 0, 0, 0},
+        caption = caption,
+        font = {size = fontsize},
+        OnClick = {action}
+    }
+end
+
 function this:New(obj, lobby_win, settings_win, wiki_win)
     self.lobby_win = lobby_win
     self.settings_win = settings_win
     self.wiki_win = wiki_win
 
     obj.x = obj.x or '30%'
-    obj.y = obj.y or '10%'
+    obj.y = obj.y or '20%'
     obj.minwidth = 320
     obj.width = obj.width or '40%'
-    obj.minHeight = 64 * 4
-    obj.height = obj.height or '80%'
+    obj.minHeight = 64 + 32 * 4
+    obj.height = obj.height or '60%'
     obj.resizable = false
     obj.draggable = false
-
     obj = inherited.New(self, obj)
 
     local logo = Chili.Image:New {
         parent = obj,
         width = "100%",
-        height = "15%",
+        height = "40%",
         keepAspect = true,
         file = "LuaUI/Widgets/gui_menu/rsrc/S44-logo-vector.png",
     }
-    local grid = Chili.Grid:New {
-        parent = obj,
-        x = '0%',
-        y = '15%',
-        width = '100%',
-        height = '85%',
-        rows = 4,
-        columns = 1,        
-        padding = {5,5,5,5},
-    }
-    -- Add the buttons
-    local PlayButton = Chili.Button:New {
-        parent = grid,
-        caption = "Multiplayer",
-        backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { GoToLobby },
-    }
-    local WikiButton = Chili.Button:New {
-        parent = grid,
-        caption = "Units",
-        backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { GoToWiki },
-    }
-    local ConfigButton = Chili.Button:New {
-        parent = grid,
-        caption = "Settings",
-        backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { GoToSettings },
-    }
-    local QuitButton = Chili.Button:New {
-        parent = grid,
-        caption = "Exit",
-        backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { Quit },
-    }
+
+    __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.15)
+    __AddButton(obj, "Units", GoToWiki, "55%", 0.15)
+    __AddButton(obj, "Settings", GoToSettings, "70%", 0.15)
+    __AddButton(obj, "QuitButton", Quit, "85%", 0.15)
 
     return obj
 end
