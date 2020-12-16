@@ -744,11 +744,11 @@ function _parse_vehicle(parent, unitDef, fontsize)
 
     local grid = Chili.Grid:New {
         parent = parent,
-        rows = 3,
+        rows = 1,
         columns = 2,
         y = y,
         width = "100%",
-        minHeight = 3 * (32 + 13 * 2),
+        minHeight = 1 * (32 + 13 * 2),
         autosize = true,
     }
 
@@ -762,27 +762,129 @@ function _parse_vehicle(parent, unitDef, fontsize)
                 "Health points",
                 string.format("%.1f", unitDef.health),
                 fontsize)
-    _table_item(grid,
-                "penetration.png",
-                "Front armour",
-                tostring(unitDef.customParams.armor_front or 0),
-                fontsize)
-    _table_item(grid,
-                "penetration.png",
-                "Rear armour",
-                tostring(unitDef.customParams.armor_rear or 0),
-                fontsize)
-    _table_item(grid,
-                "penetration.png",
-                "Sides armour",
-                tostring(unitDef.customParams.armor_side or 0),
-                fontsize)
-    _table_item(grid,
-                "penetration.png",
-                "Top armour",
-                tostring(unitDef.customParams.armor_top or 0),
-                fontsize)
     y = y + grid.height
+
+    local armour = table.unserialize(unitDef.customParams.armour)
+    if armour["base"] then
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Hull armor...",
+            font = {size = fontsize},
+            y = y,
+            width= "100%",
+        }
+        y = y + label.height
+        local grid = Chili.Grid:New {
+            parent = parent,
+            rows = 2,
+            columns = 4,
+            y = y,
+            width = "100%",
+            minHeight = 2 * (32 + 13 * 2),
+            autosize = true,
+        }
+        _table_item(grid,
+                    "penetration.png",
+                    "Front",
+                    tostring(armour["base"].front.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Rear",
+                    tostring(armour["base"].rear.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Sides",
+                    tostring(armour["base"].side.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Top",
+                    tostring(armour["base"].top.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["base"].front.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["base"].rear.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["base"].side.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["base"].top.slope or 0),
+                    fontsize)
+        y = y + grid.height
+    end
+    if armour["turret"] then
+        local label = Chili.TextBox:New {
+            parent = parent,
+            text = "Turret armor...",
+            font = {size = fontsize},
+            y = y,
+            width= "100%",
+        }
+        y = y + label.height
+        local grid = Chili.Grid:New {
+            parent = parent,
+            rows = 2,
+            columns = 4,
+            y = y,
+            width = "100%",
+            minHeight = 2 * (32 + 13 * 2),
+            autosize = true,
+        }
+        _table_item(grid,
+                    "penetration.png",
+                    "Front",
+                    tostring(armour["turret"].front.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Rear",
+                    tostring(armour["turret"].rear.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Sides",
+                    tostring(armour["turret"].side.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "penetration.png",
+                    "Top",
+                    tostring(armour["turret"].top.thickness or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["turret"].front.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["turret"].rear.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["turret"].side.slope or 0),
+                    fontsize)
+        _table_item(grid,
+                    "armor_slope.png",
+                    "",
+                    tostring(armour["turret"].top.slope or 0),
+                    fontsize)
+        y = y + grid.height
+    end
 
     y = _create_categories(parent, unitDef, fontsize, y)
 
