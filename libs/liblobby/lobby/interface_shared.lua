@@ -50,9 +50,9 @@ function Interface:Connect(host, port, user, password, cpu, localIP, lobbyVersio
 		-- The socket is expected to return "timeout" immediately since timeout time is set  to 0
 	elseif not (res == nil and err == "timeout") then
 		Spring.Log(LOG_SECTION, LOG.ERROR, "Error in connect: " .. err)
-	else
-		self.status = "connecting"
-	end
+        else
+            self.status = "connecting"
+        end
 	return true
 end
 

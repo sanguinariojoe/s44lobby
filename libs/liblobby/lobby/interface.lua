@@ -32,7 +32,7 @@ function Interface:Login(user, password, cpu, localIP, lobbyVersion)
 		localIP = "*"
 	end
 	password = VFS.CalculateHash(password, 0)
-	sentence = "LuaLobby " .. lobbyVersion .. "\t" .. self.agent .. "\t" .. "b"
+	sentence = "LuaLobby " .. lobbyVersion .. "\t" .. self.agent .. "\t" .. "b sp"
 	cmd = concat("LOGIN", user, password, "0", localIP, sentence)
 	self:_SendCommand(cmd)
 	return self
@@ -49,11 +49,13 @@ end
 ------------------------
 
 function Interface:FriendList()
+	self:super("FriendList")
 	self:_SendCommand("FRIENDLIST", true)
 	return self
 end
 
 function Interface:FriendRequestList()
+	self:super("FriendRequestList")
 	self:_SendCommand("FRIENDREQUESTLIST", true)
 	return self
 end
@@ -199,6 +201,9 @@ function Interface:RejoinBattle(battleID)
 end
 
 function Interface:JoinBattle(battleID, password, scriptPassword)
+	scriptPassword = scriptPassword or (tostring(math.floor(math.random() * 65536)) .. tostring(math.floor(math.random() * 65536)))
+	password = password or "empty"
+	self.changedTeamIDOnceAfterJoin = false
 	self:super("JoinBattle", battleID, password, scriptPassword)
 	self:_SendCommand(concat("JOINBATTLE", battleID, password, scriptPassword))
 	return self
@@ -275,7 +280,7 @@ end
 function Interface:AddAi(aiName, aiLib, allyNumber, version)
 	local battleStatus = {
 		isReady = true,
-		teamNumber = allyNumber,
+		teamNumber = self:GetUnusedTeamID(),
 		allyNumber = allyNumber,
 		playMode = true,
 		sync = true,
@@ -618,6 +623,9 @@ Interface.commandPattern["JOINBATTLE"] = "(%d+)%s+(%S+)"
 
 function Interface:_OnJoinedBattle(battleID, userName, scriptPassword)
 	battleID = tonumber(battleID)
+	if userName == self.myUserName then
+		self.scriptPassword = scriptPassword
+	end
 	self:super("_OnJoinedBattle", battleID, userName, scriptPassword)
 end
 Interface.commands["JOINEDBATTLE"] = Interface._OnJoinedBattle
@@ -649,10 +657,40 @@ Interface.commandPattern["UPDATEBATTLEINFO"] = "(%d+)%s+(%S+)%s+(%S+)%s+(%S+)%s+
 function Interface:_OnClientBattleStatus(userName, battleStatus, teamColor)
 	local status = ParseBattleStatus(battleStatus)
 	status.teamColor = ParseTeamColor(teamColor)
+
 	self:_OnUpdateUserBattleStatus(userName, status)
+	if userName == self.myUserName then
+		self:_EnsureMyTeamNumberIsUnique()
+	end
 end
 Interface.commands["CLIENTBATTLESTATUS"] = Interface._OnClientBattleStatus
 Interface.commandPattern["CLIENTBATTLESTATUS"] = "(%S+)%s+(%S+)%s+(%S+)"
+
+function Interface:_EnsureMyTeamNumberIsUnique()
+	local myBattleStatus = self.userBattleStatus[self.myUserName]
+	if myBattleStatus == nil then
+		return
+	end
+
+	if myBattleStatus.isSpectator then
+		return
+	end
+
+	if self.changedTeamIDOnceAfterJoin then
+		return
+	end
+
+	for name, data in pairs(self.userBattleStatus) do
+		if name ~= self.myUserName and data.teamNumber == myBattleStatus.teamNumber and not data.isSpectator then
+			-- need to change teamID so it's unique
+			self.changedTeamIDOnceAfterJoin = true
+			self:SetBattleStatus({
+				teamNumber = self:GetUnusedTeamID()
+			})
+			break
+		end
+	end
+end
 
 function Interface:_OnAddBot(battleID, name, owner, battleStatus, teamColor, aiDll)
 	battleID = tonumber(battleID)

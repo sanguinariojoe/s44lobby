@@ -229,7 +229,7 @@ function Lobby:SetBattleStatus(status)
 	return self
 end
 
-function Lobby:AddAi(aiName, aiLib, allyNumber, version)
+function Lobby:AddAi(aiName, aiLib, allyNumber, version, options)
 	return self
 end
 
@@ -366,6 +366,18 @@ function Lobby:LeaveParty()
 end
 
 function Lobby:PartyInviteResponse(partyID, accepted)
+	return self
+end
+
+------------------------
+-- Battle Propose commands
+------------------------
+
+function Lobby:BattleProposalRespond(userName, accepted)
+	return self
+end
+
+function Lobby:BattleProposalBattleInvite(userName, battleID, password)
 	return self
 end
 
@@ -578,7 +590,16 @@ function Lobby:_OnUnfriend(userName)
 	self:_CallListeners("OnUnfriend", userName)
 end
 
-function Lobby:_OnFriendList()
+function Lobby:_OnFriendList(friends)
+	self.friends = friends
+	self.friendCount = #friends
+
+	for _, userName in pairs(self.friends) do
+		self.isFriend[userName] = true
+		local userInfo = self:TryGetUser(userName)
+		userInfo.isFriend = true
+	end
+
 	self:_CallListeners("OnFriendList", self:GetFriends())
 end
 
@@ -834,8 +855,10 @@ function Lobby:_OnUpdateUserBattleStatus(userName, status)
 		userData.isSpectator = status.isSpectator
 	end
 	userData.sync       = status.sync  or userData.sync
+	userData.side       = status.side  or userData.side
 	userData.aiLib      = status.aiLib or userData.aiLib
 	userData.aiVersion  = status.aiVersion or userData.aiVersion
+	userData.aiOptions  = status.aiOptions or userData.aiOptions
 	userData.owner      = status.owner or userData.owner
 	userData.teamColor  = status.teamColor or userData.teamColor
 
@@ -843,10 +866,12 @@ function Lobby:_OnUpdateUserBattleStatus(userName, status)
 	status.teamNumber   = userData.teamNumber
 	status.isSpectator  = userData.isSpectator
 	status.sync         = userData.sync
+	status.side         = userData.side
 	status.aiLib        = userData.aiLib
 	status.aiVersion    = userData.aiVersion
+	status.aiOptions    = userData.aiOptions
 	status.owner        = userData.owner
-	status.teamColor	= userData.teamColor
+	status.teamColor    = userData.teamColor
 	self:_CallListeners("OnUpdateUserBattleStatus", userName, status)
 
 	if changedSpectator or changedAllyTeam then
@@ -1161,6 +1186,18 @@ function Lobby:_OnPartyInviteResponse(userName, accepted) -- Invite response rec
 end
 
 ------------------------
+-- Battle Propose commands
+------------------------
+
+function Lobby:_OnBattleProposalResponse(userName, accepted)
+	self:_CallListeners("OnBattleProposalResponse", userName, accepted)
+end
+
+function Lobby:_OnBattleProposalBattleInvite(userName, battleID, password)
+	self:_CallListeners("OnBattleProposalBattleInvite", userName, battleID, password)
+end
+
+------------------------
 -- Planetwars Commands
 ------------------------
 
@@ -1328,8 +1365,8 @@ function Lobby:GetUnusedTeamID()
 	local unusedTeamID = 0
 	local takenTeamID = {}
 	for name, data in pairs(self.userBattleStatus) do
-		if data.TeamNumber and not data.isSpectator then
-			local teamID = data.teamNumber
+		local teamID = data.teamNumber
+		if teamID and not data.isSpectator then
 			takenTeamID[teamID] = true
 			while takenTeamID[unusedTeamID] do
 				unusedTeamID = unusedTeamID + 1
