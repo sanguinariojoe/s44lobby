@@ -225,7 +225,11 @@ function NodeSelected(self, node)
             end
             ParseUnit(node.children[1].unitDef)
         else
-            Spring.Echo("Redirecting to documented line...", name)
+            local parent = obj.parent.parent
+            while parent and parent.Expand do
+                parent:Collapse()
+                parent = parent.parent
+            end
             UNITS[name].parent:Select()
         end
         return
