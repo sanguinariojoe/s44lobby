@@ -318,19 +318,13 @@ function BattleRoomWindow:New(obj)
 
             local battle = lobby:GetBattle(battleID)
             obj.download_progress = {}
-            -- TODO: Look for a reliable way to check and download engine
-            -- versions
-            --[[
-            local engineName = battle.engineName .. " " .. battle.engineVersion
-            if not VFS.HasArchive(engineName) then
-                _Download(engineName, "engine")
-            end
-            --]]
             if not VFS.HasArchive(battle.gameName) then
                 _Download(battle.gameName, "game")
             end
             if not VFS.HasArchive(battle.mapName) then
                 _Download(battle.mapName, "map")
+            else
+                _OnDownloadFinished(battle.mapName, "map")
             end
 
             _changeTab(obj)
@@ -356,17 +350,13 @@ function BattleRoomWindow:New(obj)
             end
             local battle = lobby:GetBattle(battleID)
             obj.download_progress = {}
-            local engineName = battle.engineName .. " " .. battle.engineVersion
-            if not VFS.HasArchive(engineName) then
-                -- TODO: For the time being this is always happening... A
-                -- reliable way to look for available engines is required
-                _Download(engineName, "engine")
-            end
             if not VFS.HasArchive(battle.gameName) then
                 _Download(battle.gameName, "game")
             end
             if not VFS.HasArchive(battle.mapName) then
                 _Download(battle.mapName, "map")
+            else
+                _OnDownloadFinished(battle.mapName, "map")
             end
         end
     )
