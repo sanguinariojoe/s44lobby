@@ -1,3 +1,6 @@
+local IMAGE_DIRNAME = "LuaUI/Images/ComWin/"
+
+
 function TopLevelParent(self)
     -- Go up in the parenting chain until we find something without parent (the
     -- screen)
@@ -153,30 +156,44 @@ function CheckboxWithLabel(obj)
     return grid, label, checkbox
 end
 
-function TreeNode(file, caption)
+function TreeNode(file, caption, w)
     local Chili = WG.Chili
+    w = w or "100%"
 
-    local grid = Chili.Grid:New {
+    local win = Chili.Window:New{
         x = 0,
         y = 0,
-        width = "100%",
-        height = 48,
+        width = w,
+        height = 32 + 2 * 5,
+        padding = {5, 5, 5, 5},
+        resizable = false,
+        draggable = false,
+        TileImage = IMAGE_DIRNAME .. "empty.png",
     }
 
     local image = Chili.Image:New {
-        parent = grid,
+        parent = win,
+        x = 0,
+        y = 0,
+        width = 32,
+        height = 32,
         file = file,
         keepAspect = true,
     }
-    
+
     local label = Chili.Label:New {
-        parent = grid,
+        parent = win,
+        x = 37,
+        y = 0,
+        width = "100%",
+        height = 32,
         caption = caption,
         align = "left",
         valign = "center",
+        font = {size = 16},
     }
 
-    return grid, image, label
+    return win, image, label
 end
 
 -- =============================================================================
