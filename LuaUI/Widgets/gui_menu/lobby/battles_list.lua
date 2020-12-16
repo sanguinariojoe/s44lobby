@@ -12,6 +12,9 @@ VFS.Include("LuaUI/Widgets/gui_menu/dialogs/password.lua")
 
 --//=============================================================================
 
+local default_games = WG.MENUOPTS.games
+local all_battles = {}
+
 local header_captions = {'\204\128',
                          '\204\130',
                          'Max',
@@ -92,6 +95,35 @@ local function _OnBattle(self)
     _JoinBattle(battleID)
 end
 
+local function _OnShowAllGames(self)
+    WG.MENUOPTS.show_all_games = not self.checked
+    if WG.MENUOPTS.show_all_games then
+        for battleID, battle in pairs(all_battles) do
+            if not battle.isDefault then
+                AddBattle(self.parent.battles_list, battleID)
+            end
+        end
+    else
+        for battleID, battle in pairs(all_battles) do
+            if not battle.isDefault then
+                local backup = battle
+                RemoveBattle(self.parent.battles_list, battleID)
+                all_battles[battleID] = backup
+            end
+        end
+    end
+end
+
+function IsDefaultGame(battle)
+    for _, default_game in ipairs(default_games) do
+        local i, j = string.find(battle.gameName, default_game)
+        if i == 1 or j == #(default_game) then
+            return true
+        end
+    end
+    return false
+end
+
 function AddBattle(list_widget, battleID)
     local battle = WG.LibLobby.lobby:GetBattle(battleID)
     -- Filter out the rooms using incompatible engines
@@ -99,11 +131,14 @@ function AddBattle(list_widget, battleID)
         Spring.Echo("Battle '" .. battle.title .. "' uses an incompatible engine version: " .. battle.engineVersion)
         return
     end
-    
+    battle.isDefault = IsDefaultGame(battle)
     battle.fields = BattleFields(battle)
-    battle.OnClick = { _OnBattle }
-    list_widget:AddEntry(battle)
-    FilterBattles(list_widget)
+    all_battles[battleID] = battle
+
+    if battle.isDefault or WG.MENUOPTS.show_all_games then
+        battle.OnClick = { _OnBattle }
+        list_widget:AddEntry(battle)
+    end
 end
 
 function FindBattle(list_widget, battleID)
@@ -116,30 +151,26 @@ function FindBattle(list_widget, battleID)
 end
 
 function UpdateBattle(list_widget, battleID)
-    local i = FindBattle(list_widget, battleID)
-    if i == nil then
-        local battle = WG.LibLobby.lobby:GetBattle(battleID)
-        if battle.engineVersion == Engine.versionFull then
-            Spring.Log("Menu", LOG.ERROR, "Cannot update battle " .. tostring(battleID))
-        end
-        return
-    end
-
     local battle = WG.LibLobby.lobby:GetBattle(battleID)
     battle.fields = BattleFields(battle)
+    if all_battles[battleID] then
+        all_battles[battleID].fields = battle.fields
+    end
+
+    local i = FindBattle(list_widget, battleID)
+    if i == nil then
+        return
+    end
     list_widget:UpdateEntry(i, battle)
 end
 
 function RemoveBattle(list_widget, battleID)
+    all_battles[battleID] = nil
+
     local i = FindBattle(list_widget, battleID)
     if i == nil then
-        local battle = WG.LibLobby.lobby:GetBattle(battleID)
-        if battle.engineVersion == Engine.versionFull then
-            Spring.Log("Menu", LOG.ERROR, "Cannot remove battle " .. tostring(battleID))
-        end
         return
     end
-
     list_widget:RemoveEntry(i)
 end
 
@@ -150,7 +181,7 @@ function BattlesWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    obj.TileImage = ":cl:empty.png"
+    -- obj.TileImage = ":cl:empty.png"
 
     obj = BattlesWindow.inherited.New(self, obj)
 
@@ -165,7 +196,19 @@ function BattlesWindow:New(obj)
         }
         headers[i] = header
     end
-    obj.battles_list = ListWidget:New {parent = obj, headers = headers}
+    obj.all_games = Chili.Checkbox:New {
+        parent = obj,
+        x = '0%',
+        y = 0,
+        width = 170,
+        height = 32,
+        padding = {0, 0, 0, 0},
+        margin = {0, 0, 0, 0},
+        checked = WG.MENUOPTS.show_all_games,
+        caption = "Show other games",
+        OnChange = {_OnShowAllGames},
+    }
+    obj.battles_list = ListWidget:New {parent = obj, headers = headers, y = 32}
 
     local lobby = WG.LibLobby.lobby
     lobby:AddListener("OnBattleOpened",

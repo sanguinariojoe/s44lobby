@@ -27,6 +27,8 @@ WG.MENUOPTS = {
     channels = {{name="s44", key=nil, lastID=nil, persistent=true,},
                 {name="s44games", key=nil, lastID=nil, persistent=true,},},
     wiki_unit = "gerpanzeriii",
+    games = {"Spring: 1944."},
+    show_all_games = false,
 }
 
 function widget:Initialize()
@@ -74,22 +76,26 @@ end
 
 function widget:GetConfigData()
     return {
-        login_tab  = WG.MENUOPTS.login_tab,
-        login_user = WG.MENUOPTS.login_user,
-        login_pass = WG.MENUOPTS.login_pass,
+        login_tab       = WG.MENUOPTS.login_tab,
+        login_user      = WG.MENUOPTS.login_user,
+        login_pass      = WG.MENUOPTS.login_pass,
         script_password = WG.MENUOPTS.script_password,
-        channels   = WG.MENUOPTS.channels,
-        wiki_unit  = WG.MENUOPTS.wiki_unit,
+        channels        = WG.MENUOPTS.channels,
+        wiki_unit       = WG.MENUOPTS.wiki_unit,
+        games           = WG.MENUOPTS.games,
+        show_all_games  = WG.MENUOPTS.show_all_games
     }
 end
 
 function widget:SetConfigData(data)
-    WG.MENUOPTS.login_tab  = data.login_tab or WG.MENUOPTS.login_tab
-    WG.MENUOPTS.login_user = data.login_user or WG.MENUOPTS.login_user
-    WG.MENUOPTS.login_pass = data.login_pass or WG.MENUOPTS.login_pass
+    WG.MENUOPTS.login_tab       = data.login_tab or WG.MENUOPTS.login_tab
+    WG.MENUOPTS.login_user      = data.login_user or WG.MENUOPTS.login_user
+    WG.MENUOPTS.login_pass      = data.login_pass or WG.MENUOPTS.login_pass
     WG.MENUOPTS.script_password = data.script_password or WG.MENUOPTS.script_password
-    WG.MENUOPTS.channels   = data.channels or WG.MENUOPTS.channels
-    WG.MENUOPTS.wiki_unit  = data.wiki_unit or WG.MENUOPTS.wiki_unit
+    WG.MENUOPTS.channels        = data.channels or WG.MENUOPTS.channels
+    WG.MENUOPTS.wiki_unit       = data.wiki_unit or WG.MENUOPTS.wiki_unit
+    WG.MENUOPTS.games           = data.games or WG.MENUOPTS.games
+    WG.MENUOPTS.show_all_games  = data.show_all_games or WG.MENUOPTS.show_all_games
 end
 
 function widget:Shutdown()
