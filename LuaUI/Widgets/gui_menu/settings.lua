@@ -93,7 +93,7 @@ local DETAILS = {['low']    = {["ShadowMapSize"]=1024,
                                ["UnitLodDist"]=100,
                                ["GrassDetail"]=0,
                                ["GroundDecals"]=0,
-                               ["UnitIconDist"]=100,
+                               -- ["UnitIconDist"]=100,  -- Overwritten by cmd_distIcon.lua
                                ["MaxParticles"]=100,
                                ["MaxNanoParticles"]=100},
                  ['medium'] = {["ShadowMapSize"]=4096,
@@ -102,7 +102,7 @@ local DETAILS = {['low']    = {["ShadowMapSize"]=1024,
                                ["UnitLodDist"]=350,
                                ["GrassDetail"]=15,
                                ["GroundDecals"]=0,
-                               ["UnitIconDist"]=550,
+                               -- ["UnitIconDist"]=550,  -- Overwritten by cmd_distIcon.lua
                                ["MaxParticles"]=4000,
                                ["MaxNanoParticles"]=6000},
                  ['high']   = {["ShadowMapSize"]=8192,
@@ -111,7 +111,7 @@ local DETAILS = {['low']    = {["ShadowMapSize"]=1024,
                                ["UnitLodDist"]=1000,
                                ["GrassDetail"]=30,
                                ["GroundDecals"]=1,
-                               ["UnitIconDist"]=1000,
+                               -- ["UnitIconDist"]=1000,  -- Overwritten by cmd_distIcon.lua
                                ["MaxParticles"]=20000,
                                ["MaxNanoParticles"]=20000}}
 local DEF_DETAIL = 'unknown'
@@ -131,7 +131,7 @@ end
 local function SetRestartButton(win)
     button = win.ok_button
     button:SetCaption("Restart")
-    button.OnMouseUp = { Restart }
+    button.OnMouseUp = { Quit }
 end
 
 local function SetAutoButton(win)
