@@ -16,6 +16,8 @@ VFS.Include("LuaUI/Widgets/gui_menu/wiki_parsers.lua")
 
 --//=============================================================================
 
+UNITS_DEPTHS = {}  -- Depth of each unit, to find the critical line
+CURRENT_DEPTH = 0  -- Current parsing depth
 UNITS = {}  -- Global list of units already added to the tree
 local selected_unit = nil
 
@@ -206,14 +208,26 @@ function ParseUnit(unitDef)
 end
 
 function NodeSelected(self, node)
-    if node.children[1].faction ~= nil then
-        ParseFaction(node.children[1].faction)
+    local obj = node.children[1]
+    if obj.faction ~= nil then
+        ParseFaction(obj.faction)
         return
     end
 
-    if node.children[1].unitDef ~= nil then
-        WG.MENUOPTS.wiki_unit = node.children[1].unitDef.name
-        ParseUnit(node.children[1].unitDef)
+    if obj.unitDef ~= nil then
+        local name = obj.unitDef.name
+        WG.MENUOPTS.wiki_unit = name
+        if Chili.CompareLinks(UNITS[name], obj) then
+            local parent = obj.parent.parent
+            while parent and parent.Expand do
+                parent:Expand()
+                parent = parent.parent
+            end
+            ParseUnit(node.children[1].unitDef)
+        else
+            Spring.Echo("Redirecting to documented line...", name)
+            UNITS[name].parent:Select()
+        end
         return
     end    
 end
@@ -233,15 +247,7 @@ function table.has(table, value)
     return false
 end
 
-function _units_tree(startUnit, side)
-    -- Departs from the starting unit, and traverse all the tech tree derived
-    -- from him, simply following the building capabilities of each unit.
-    local name = startUnit
-    local obj = _unit_node(name)
-    local unitDef = obj.unitDef
-
-    local tree = {}
-
+function _unit_children(unitDef, side)
     -- Get the children
     local children = {}
     local tmpchildren = unitDef.buildOptions
@@ -251,7 +257,7 @@ function _units_tree(startUnit, side)
         end
     end
 
-    if name == side .. "pontoontruck" then
+    if unitDef.name == side .. "pontoontruck" then
         -- The factories transformations are added as morphing links build
         -- options. However, the pontoontruck morph to shipyard is not specified
         -- as a build option, so we must manually add it
@@ -272,28 +278,58 @@ function _units_tree(startUnit, side)
         children[#children + 1] = child
     end
 
-    -- We want to get each unit, and its subtree, parsed as soon as possible.
-    -- However, we don't want to parse each unit subtree more than once, so we
-    -- are keeping a local record of the units we must parse here
-    local parsed = {}
-    for i, name in ipairs(children) do
-        parsed[i] = UNITS[name] ~= nil
-        UNITS[name] = unitDef.humanName
+    return children
+end
+
+function _units_depth(name, side)
+    if CURRENT_DEPTH == 0 then
+        UNITS_DEPTHS = {}
     end
+
+    CURRENT_DEPTH = CURRENT_DEPTH + 1
+
+    if UNITS_DEPTHS[name] ~= nil and UNITS_DEPTHS[name] <= CURRENT_DEPTH then
+        -- A better line was already found, skip it
+        CURRENT_DEPTH = CURRENT_DEPTH - 1
+        return
+    end
+    UNITS_DEPTHS[name] = CURRENT_DEPTH
+    
+    local children = _unit_children(UnitDefNames[name], side)
+    for i, name in ipairs(children) do
+        _units_depth(name, side)
+    end
+
+    CURRENT_DEPTH = CURRENT_DEPTH - 1
+end
+
+function _units_tree(startUnit, side)
+    -- Departs from the starting unit, and traverse all the tech tree derived
+    -- from him, simply following the building capabilities of each unit.
+    local name = startUnit
+    local obj = _unit_node(name)
+    local tree = {}
+
+    CURRENT_DEPTH = CURRENT_DEPTH + 1
+    if UNITS[name] ~= nil or UNITS_DEPTHS[name] < CURRENT_DEPTH then
+        -- Not the critical line
+        CURRENT_DEPTH = CURRENT_DEPTH - 1
+        return obj, tree
+    end
+    UNITS[name] = obj
+
+    local children = _unit_children(obj.unitDef, side)
 
     -- Now we can add the entities
     for i, name in ipairs(children) do
-        -- We always want to traverse the squad/sortie members again
-        if parsed[i] and (#_squad_children(UnitDefNames[name]) == 0) then
-            tree[#tree + 1] = _unit_node(name)
-        else
-            subobj, subtree = _units_tree(name, side)
-            tree[#tree + 1] = subobj
-            if #subtree > 0 then
-                tree[#tree + 1] = subtree
-            end
+        subobj, subtree = _units_tree(name, side)
+        tree[#tree + 1] = subobj
+        if #subtree > 0 then
+            tree[#tree + 1] = subtree
         end
     end
+
+    CURRENT_DEPTH = CURRENT_DEPTH - 1
     return obj, tree
 end
 
@@ -340,6 +376,8 @@ function UnitsTreeWindow:New(obj)
                 'LuaUI/Widgets/faction_change/' .. string.lower(faction.name) .. '.png',
                 faction.name)
             data[#data].faction = faction
+            _units_depth(string.lower(faction.startUnit),
+                         string.lower(faction.name))
             local obj, tree = _units_tree(string.lower(faction.startUnit),
                                           string.lower(faction.name))
             data[#data + 1] = {obj, tree}
@@ -361,7 +399,8 @@ function UnitsTreeWindow:New(obj)
         parent = scroll,
         nodes = data,
         OnSelectNode = { NodeSelected },
-    }    
+    }
+    obj.tree = tree
 
     -- Create a back button
     local ok = Chili.Button:New {
