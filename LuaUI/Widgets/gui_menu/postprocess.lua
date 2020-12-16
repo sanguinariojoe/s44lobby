@@ -177,4 +177,5 @@ end
 function this:Show(visitor)
     self.visitor = visitor
     inherited.Show(self)
+    SetEscAction(self, Back)
 end

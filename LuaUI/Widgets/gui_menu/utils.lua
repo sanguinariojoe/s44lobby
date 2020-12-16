@@ -197,6 +197,22 @@ function TreeNode(file, caption, w)
 end
 
 -- =============================================================================
+-- Control escape key
+-- =============================================================================
+local _EscActor, _EscAction = nil, nil
+
+function SetEscAction(actor, action)
+    _EscActor = actor
+    _EscAction = action
+end
+
+function ExecuteEscAction()
+    if _EscAction ~= nil then
+        _EscAction(_EscActor)
+    end
+end
+
+-- =============================================================================
 -- Chobby great string utilities
 -- =============================================================================
 

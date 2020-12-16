@@ -66,6 +66,10 @@ function widget:Initialize()
     }, lobby, settings, wiki)
     -- Fire up main window
     main:Show()
+
+    widgetHandler:AddAction("s44esckey", Chili.ExecuteEscAction)
+    Spring.SendCommands({"unbindkeyset esc"})
+    Spring.SendCommands("bind esc s44esckey")
 end
 
 function widget:GetConfigData()
@@ -86,4 +90,9 @@ function widget:SetConfigData(data)
     WG.MENUOPTS.script_password = data.script_password or WG.MENUOPTS.script_password
     WG.MENUOPTS.channels   = data.channels or WG.MENUOPTS.channels
     WG.MENUOPTS.wiki_unit  = data.wiki_unit or WG.MENUOPTS.wiki_unit
+end
+
+function widget:Shutdown()
+    widgetHandler:RemoveAction("s44esckey")
+    Spring.SendCommands("unbind esc s44esckey")
 end

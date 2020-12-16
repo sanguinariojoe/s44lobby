@@ -225,6 +225,8 @@ function LobbyWindow:Show(visitor)
     if self.status_label.caption == "offline" then
         OnStatus(self.status_label)
     end
+
+    SetEscAction(self, Back)
 end
 
 function OnStatus(self)

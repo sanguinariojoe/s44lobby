@@ -428,5 +428,7 @@ end
 function UnitsTreeWindow:Show(visitor)
     self.visitor = visitor
     UnitsTreeWindow.inherited.Show(self)
-    ParseUnit(UnitDefNames[WG.MENUOPTS.wiki_unit:lower()])
+    local name = WG.MENUOPTS.wiki_unit:lower()
+    UNITS[name].parent:Select()
+    SetEscAction(self, Back)
 end
