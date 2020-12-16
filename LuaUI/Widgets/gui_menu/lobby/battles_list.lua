@@ -94,9 +94,16 @@ end
 
 function AddBattle(list_widget, battleID)
     local battle = WG.LibLobby.lobby:GetBattle(battleID)
+    -- Filter out the rooms using incompatible engines
+    if battle.engineVersion ~= Engine.versionFull then
+        Spring.Echo("Battle '" .. battle.title .. "' uses an incompatible engine version: " .. battle.engineVersion)
+        return
+    end
+    
     battle.fields = BattleFields(battle)
     battle.OnClick = { _OnBattle }
     list_widget:AddEntry(battle)
+    FilterBattles(list_widget)
 end
 
 function FindBattle(list_widget, battleID)
@@ -111,7 +118,10 @@ end
 function UpdateBattle(list_widget, battleID)
     local i = FindBattle(list_widget, battleID)
     if i == nil then
-        Spring.Log("Menu", LOG.ERROR, "Cannot find battle", battleID)
+        local battle = WG.LibLobby.lobby:GetBattle(battleID)
+        if battle.engineVersion == Engine.versionFull then
+            Spring.Log("Menu", LOG.ERROR, "Cannot update battle " .. tostring(battleID))
+        end
         return
     end
 
@@ -123,7 +133,10 @@ end
 function RemoveBattle(list_widget, battleID)
     local i = FindBattle(list_widget, battleID)
     if i == nil then
-        Spring.Log("Menu", LOG.ERROR, "Cannot find battle", battleID)
+        local battle = WG.LibLobby.lobby:GetBattle(battleID)
+        if battle.engineVersion == Engine.versionFull then
+            Spring.Log("Menu", LOG.ERROR, "Cannot remove battle " .. tostring(battleID))
+        end
         return
     end
 
