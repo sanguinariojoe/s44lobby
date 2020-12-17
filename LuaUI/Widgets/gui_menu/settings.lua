@@ -241,12 +241,16 @@ end
 
 function this:New(obj, postprocess_win)
     self.postprocess_win = postprocess_win
+    local n_buttons = 2
+    if not self.postprocess_win then
+        n_buttons = 1
+    end
 
     obj.x = obj.x or '30%'
     obj.y = obj.y or '10%'
     obj.minwidth = 320
     obj.width = obj.width or '40%'
-    obj.minHeight = 64 * 5 + 3 * 5 + 2 * 16
+    obj.minHeight = 64 * (3 + n_buttons) + 3 * 5 + 2 * 16
     obj.height = obj.height or obj.minHeight
     obj.resizable = false
     obj.draggable = false
@@ -260,17 +264,19 @@ function this:New(obj, postprocess_win)
         x = '0%',
         y = 64 * 3 + 2 * 5,
         width = '100%',
-        height = 64 * 2 + 5,
-        rows = 2,
+        height = 64 * n_buttons + 5,
+        rows = n_buttons,
         columns = 1,        
         padding = {5,0,5,5},
     }
-    local postprocess = Chili.Button:New {
-        parent = grid,
-        caption = "GFX Post-Processing",
-        backgroundColor = { 1, 1, 1, 1 },
-        OnMouseUp = { GoToPostProcess },
-    }
+    if self.postprocess_win then
+        local postprocess = Chili.Button:New {
+            parent = grid,
+            caption = "GFX Post-Processing",
+            backgroundColor = { 1, 1, 1, 1 },
+            OnMouseUp = { GoToPostProcess },
+        }
+    end
     local ok = Chili.Button:New {
         parent = grid,
         caption = "Back",

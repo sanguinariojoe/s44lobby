@@ -32,7 +32,7 @@ function Back(self)
 end
 
 function Quit()
-    Spring.SendCommands({"QuitForce",})
+    Spring.Quit()
 end
 
 function Restart()

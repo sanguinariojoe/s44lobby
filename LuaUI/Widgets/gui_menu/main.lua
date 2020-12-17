@@ -80,10 +80,16 @@ function this:New(obj, lobby_win, settings_win, wiki_win)
         file = "LuaUI/Widgets/gui_menu/rsrc/S44-logo-vector.png",
     }
 
-    __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.15)
-    __AddButton(obj, "Units", GoToWiki, "55%", 0.15)
-    __AddButton(obj, "Settings", GoToSettings, "70%", 0.15)
-    __AddButton(obj, "QuitButton", Quit, "85%", 0.15)
+    if self.wiki_win then
+        __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.15)
+        __AddButton(obj, "Units", GoToWiki, "55%", 0.15)
+        __AddButton(obj, "Settings", GoToSettings, "70%", 0.15)
+        __AddButton(obj, "QuitButton", Quit, "85%", 0.15)
+    else
+        __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.20)
+        __AddButton(obj, "Settings", GoToSettings, "60%", 0.20)
+        __AddButton(obj, "QuitButton", Quit, "80%", 0.20)
+    end
 
     return obj
 end
