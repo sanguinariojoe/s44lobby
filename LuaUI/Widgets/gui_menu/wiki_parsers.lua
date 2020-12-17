@@ -37,7 +37,7 @@ function _table_item(grid, img, title, txt, fontsize, y)
     }
 
     local subsubgrid = Chili.Window:New {
-        TileImage = ":cl:empty.png",
+        TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
         parent = subgrid,
         height = fontsize,
         resizable = false,

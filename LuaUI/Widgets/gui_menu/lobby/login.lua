@@ -1,6 +1,6 @@
 local Chili = WG.Chili
 
-LoginWindow = Chili.Window:Inherit{
+LoginWindow = Chili.Control:Inherit{
     drawcontrolv2 = true
 }
 
@@ -46,13 +46,32 @@ function Register(self)
 end
 
 function LoginWindow:New(obj)
-    obj.x = obj.x or '30%'
-    obj.y = obj.y or '30%'
-    obj.width = obj.width or '40%'
+    local x = obj.x or '30%'
+    local y = obj.y or '30%'
+    local w = obj.width or '40%'
+
+    obj.x = 0
+    obj.y = 0
+    obj.right = 0
+    obj.bottom = 0
+    obj.padding = {0,0,0,0}
+    obj.margin = {0,0,0,0}
+    --[[
     obj.resizable = false
     obj.draggable = false
+    obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
+    --]]
 
     obj = LoginWindow.inherited.New(self, obj)
+
+    local win = Chili.Window:New {
+        x = x,
+        y = y,
+        width = w,
+        resizable = false,
+        draggable = false,
+        parent = obj,
+    }
 
     -- Login fields
     -- ============
@@ -153,7 +172,7 @@ function LoginWindow:New(obj)
 
     -- Tabs panel
     obj.tabs = Chili.TabPanel:New {
-        parent = obj,
+        parent = win,
         x = '0%',
         y = '0%',
         width = '100%',

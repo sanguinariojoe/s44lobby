@@ -56,8 +56,8 @@ function VerificationCodeWindow:New(obj, login_win)
         width = '100%',
         height = obj.height - 148,
         horizontalScrollbar = false,
-        BorderTileImage = ":cl:empty.png",
-        BackgroundTileImage = ":cl:empty.png",
+        BorderTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+        BackgroundTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
     }
     obj.agreement_text = ""
     obj.agreement = Chili.TextBox:New {

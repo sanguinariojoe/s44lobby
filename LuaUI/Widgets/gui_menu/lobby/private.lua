@@ -51,7 +51,7 @@ function PrivateChatWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    obj.TileImage = ":cl:empty.png"
+    obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
     obj.padding = obj.padding or {0, 0, 0, 0}
 
     obj = PrivateChatWindow.inherited.New(self, obj)
@@ -63,8 +63,8 @@ function PrivateChatWindow:New(obj)
         width = '100%',
         height = '95%',
         horizontalScrollbar = false,
-        BorderTileImage = ":cl:empty.png",
-        BackgroundTileImage = ":cl:empty.png",
+        BorderTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+        BackgroundTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
     }
     obj.chat = Chili.TextBox:New {
         parent = obj.chat_container,

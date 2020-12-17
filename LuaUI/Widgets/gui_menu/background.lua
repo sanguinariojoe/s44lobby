@@ -42,7 +42,6 @@ function this:New(obj)
         y = 0,
         padding = {0,0,0,0},
         margin = {0,0,0,0},
-        color = self.colorOverride,
         keepAspect = true,
         file = RandomImage(),
     }

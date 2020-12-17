@@ -106,7 +106,7 @@ function ListWidget:AddEntry(data)
         height = 32,
         padding = {0, 0, 0, 0},
         margin = {0, 0, 0, 0},
-        TileImageBK = ":cl:empty.png",
+        TileImageBK = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
         caption = "",
         OnClick = data.OnClick,
         user_data = data,
@@ -186,8 +186,8 @@ function ListWidget:New(obj)
     obj.width = obj.width or '100%'
     obj.height = obj.height or '100%'
     obj.horizontalScrollbar = obj.horizontalScrollbar or false
-    obj.BorderTileImage = obj.BorderTileImage or ":cl:empty.png"
-    obj.BackgroundTileImage = obj.BackgroundTileImage or ":cl:empty.png"
+    obj.BorderTileImage = obj.BorderTileImage or "LuaUI/Widgets/gui_menu/rsrc/empty.png"
+    obj.BackgroundTileImage = obj.BackgroundTileImage or "LuaUI/Widgets/gui_menu/rsrc/empty.png"
     obj.order_id = obj.order_id or 0
     if obj.headers == nil then
         Spring.Log("Menu",
@@ -216,7 +216,7 @@ function ListWidget:New(obj)
         height = 32,
         resizable = false,
         draggable = false,
-        TileImage = ":cl:empty.png",
+        TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
         padding = {0, 0, 0, 0},
         margin = {0, 0, 0, 0}
     }

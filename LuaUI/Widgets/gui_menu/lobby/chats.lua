@@ -87,7 +87,7 @@ function Joined2Channel(obj, name)
             height = 16,
             padding = {0, 0, 0, 0},
             margin = {0, 0, 0, 0},
-            TileImageBK = ":cl:empty.png",
+            TileImageBK = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
             caption = "X",
             OnClick = { _OnLeaveChannel, },
             user_data = {
@@ -134,7 +134,7 @@ function ChatsWindow:JoinPrivate(name, change_tab)
         height = 16,
         padding = {0, 0, 0, 0},
         margin = {0, 0, 0, 0},
-        TileImageBK = ":cl:empty.png",
+        TileImageBK = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
         caption = "X",
         OnClick = { _OnLeaveChannel, },
         user_data = {
@@ -161,7 +161,7 @@ function ChatsWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    obj.TileImage = ":cl:empty.png"
+    obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
     obj.first_show = true
     obj.OnShow = { OnShowChatsWindow, }
 

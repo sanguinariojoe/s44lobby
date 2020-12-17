@@ -105,8 +105,8 @@ function ParseFaction(faction)
         horizontalScrollbar = false,
     }
 
-    grid.BorderTileImage = ":cl:empty.png"
-    grid.BackgroundTileImage = ":cl:empty.png"
+    grid.BorderTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
+    grid.BackgroundTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
 
     local fontsize = 14
     local dw = obj.padding[1] + obj.padding[3]
@@ -145,8 +145,8 @@ function ParseUnit(unitDef)
         height = h,
         horizontalScrollbar = false,
     }
-    scroll.BorderTileImage = ":cl:empty.png"
-    scroll.BackgroundTileImage = ":cl:empty.png"
+    scroll.BorderTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
+    scroll.BackgroundTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
 
     --[[
     local grid = Chili.StackPanel:New {
@@ -344,7 +344,7 @@ function UnitsTreeWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    obj.TileImage = ":cl:empty.png"
+    obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
 
     obj = UnitsTreeWindow.inherited.New(self, obj)
 
@@ -396,8 +396,8 @@ function UnitsTreeWindow:New(obj)
         width = '100%',
         height = '100%',
     }
-    scroll.BorderTileImage = ":cl:empty.png"
-    scroll.BackgroundTileImage = ":cl:empty.png"
+    scroll.BorderTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
+    scroll.BackgroundTileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
 
     local tree = Chili.TreeView:New {
         parent = scroll,

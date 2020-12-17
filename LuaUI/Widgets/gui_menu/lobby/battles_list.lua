@@ -181,7 +181,7 @@ function BattlesWindow:New(obj)
     obj.height = obj.height or '100%'
     obj.resizable = false
     obj.draggable = false
-    -- obj.TileImage = ":cl:empty.png"
+    -- obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
 
     obj = BattlesWindow.inherited.New(self, obj)
 
