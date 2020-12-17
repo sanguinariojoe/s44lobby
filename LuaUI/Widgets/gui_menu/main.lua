@@ -50,7 +50,7 @@ function __AddButton(parent, caption, action, y, h)
         y = y,
         width = "100%",
         height = h,
-        padding = {0, 0, 0, 0},
+        padding = {0, 0, 0, 0},untitled
         caption = caption,
         font = {size = fontsize},
         OnClick = {action}
@@ -88,7 +88,7 @@ function this:New(obj, lobby_win, settings_win, wiki_win)
     else
         __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.20)
         __AddButton(obj, "Settings", GoToSettings, "60%", 0.20)
-        __AddButton(obj, "QuitButton", Quit, "80%", 0.20)
+        __AddButton(obj, "Quit", Quit, "80%", 0.20)
     end
 
     return obj
