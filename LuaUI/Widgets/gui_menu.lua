@@ -12,6 +12,7 @@ function widget:GetInfo()
 end 
 
 local components = {
+    "background.lua",
     "lobby.lua",
     "main.lua",
     "settings.lua",
@@ -50,28 +51,40 @@ function widget:Initialize()
         VFS.Include("LuaUI/Widgets/gui_menu/" .. file, Chili, VFS.RAW_FIRST)
     end
 
-    -- Setup the windows
+    local postprocess = nil
+    local wiki = nil
+    if LUA_NAME == "LuaUI" then
+        -- Components just available in LuaUI, not in LuaMenu
+        postprocess = Chili.PostprocessWindow:New({
+            parent = Screen0,
+        })
+        wiki = Chili.UnitsTreeWindow:New({
+            parent = Screen0,
+        })
+    else
+        -- The fixed background for LuaMenu
+        local background = Chili.BackgroundControl:New({
+            parent = Screen0,
+        })
+    end
+    -- Setup everything
     local lobby = Chili.LobbyWindow:New({
-        parent = Screen0,
-    })
-    local postprocess = Chili.PostprocessWindow:New({
         parent = Screen0,
     })
     local settings = Chili.SettingsWindow:New({
         parent = Screen0,
     }, postprocess)
-    local wiki = Chili.UnitsTreeWindow:New({
-        parent = Screen0,
-    })
     local main = Chili.MainWindow:New({
         parent = Screen0,
     }, lobby, settings, wiki)
     -- Fire up main window
     main:Show()
 
-    widgetHandler:AddAction("s44esckey", Chili.ExecuteEscAction)
-    Spring.SendCommands({"unbindkeyset esc"})
-    Spring.SendCommands("bind esc s44esckey")
+    if LUA_NAME == "LuaUI" then
+        widgetHandler:AddAction("s44esckey", Chili.ExecuteEscAction)
+        Spring.SendCommands({"unbindkeyset esc"})
+        Spring.SendCommands("bind esc s44esckey")
+    end
 end
 
 function widget:GetConfigData()
@@ -99,6 +112,8 @@ function widget:SetConfigData(data)
 end
 
 function widget:Shutdown()
-    widgetHandler:RemoveAction("s44esckey")
-    Spring.SendCommands("unbind esc s44esckey")
+    if LUA_NAME == "LuaUI" then
+        widgetHandler:RemoveAction("s44esckey")
+        Spring.SendCommands("unbind esc s44esckey")
+    end
 end

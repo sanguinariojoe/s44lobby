@@ -50,7 +50,7 @@ function __AddButton(parent, caption, action, y, h)
         y = y,
         width = "100%",
         height = h,
-        padding = {0, 0, 0, 0},untitled
+        padding = {0, 0, 0, 0},
         caption = caption,
         font = {size = fontsize},
         OnClick = {action}
