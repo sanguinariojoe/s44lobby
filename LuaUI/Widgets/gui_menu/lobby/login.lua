@@ -56,13 +56,20 @@ function LoginWindow:New(obj)
     obj.bottom = 0
     obj.padding = {0,0,0,0}
     obj.margin = {0,0,0,0}
-    --[[
-    obj.resizable = false
-    obj.draggable = false
-    obj.TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png"
-    --]]
 
     obj = LoginWindow.inherited.New(self, obj)
+
+    -- Create a large button to hijack the clicks of all windows behind
+    local clickhijack = Chili.Button:New {
+        x = "0%",
+        y = "0%",
+        width = "100%",
+        height = "100%",
+        caption = "",
+        TileImageBK = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+        TileImageFG = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+        parent = obj,
+    }
 
     local win = Chili.Window:New {
         x = x,
