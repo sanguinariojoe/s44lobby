@@ -9,6 +9,13 @@ local inherited = this.inherited
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 
+local function GoToSinglePlayer(self)
+    local win = TopLevelParent(self)
+    local child = win.single_player_win
+    child:Show(win)
+    win:Hide()
+end
+
 local function GoToLobby(self)
     local win = TopLevelParent(self)
     local child = win.lobby_win
@@ -57,7 +64,8 @@ function __AddButton(parent, caption, action, y, h)
     }
 end
 
-function this:New(obj, lobby_win, settings_win, wiki_win)
+function this:New(obj, single_player_win, lobby_win, settings_win, wiki_win)
+    self.single_player_win = single_player_win
     self.lobby_win = lobby_win
     self.settings_win = settings_win
     self.wiki_win = wiki_win
@@ -81,14 +89,16 @@ function this:New(obj, lobby_win, settings_win, wiki_win)
     }
 
     if self.wiki_win then
-        __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.15)
-        __AddButton(obj, "Units", GoToWiki, "55%", 0.15)
-        __AddButton(obj, "Settings", GoToSettings, "70%", 0.15)
-        __AddButton(obj, "QuitButton", Quit, "85%", 0.15)
+        __AddButton(obj, "Single player", GoToSinglePlayer, "40%", 0.12)
+        __AddButton(obj, "Multiplayer", GoToLobby, "52%", 0.12)
+        __AddButton(obj, "Units", GoToWiki, "64%", 0.12)
+        __AddButton(obj, "Settings", GoToSettings, "76%", 0.12)
+        __AddButton(obj, "QuitButton", Quit, "88%", 0.12)
     else
-        __AddButton(obj, "Multiplayer", GoToLobby, "40%", 0.20)
-        __AddButton(obj, "Settings", GoToSettings, "60%", 0.20)
-        __AddButton(obj, "Quit", Quit, "80%", 0.20)
+        __AddButton(obj, "Single player", GoToSinglePlayer, "40%", 0.15)
+        __AddButton(obj, "Multiplayer", GoToLobby, "55%", 0.15)
+        __AddButton(obj, "Settings", GoToSettings, "70%", 0.15)
+        __AddButton(obj, "Quit", Quit, "85%", 0.15)
     end
 
     return obj

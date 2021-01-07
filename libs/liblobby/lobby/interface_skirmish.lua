@@ -407,11 +407,7 @@ function InterfaceSkirmish:SetBattleState(myUserName, gameName, mapName, title)
 	})
 	self:_OnJoinBattle(myBattleID, myUserName)
 	self:_OnJoinedBattle(myBattleID, myUserName)
-	local modoptions = {}
-	if VFS.FileExists(LUA_DIRNAME .. "configs/testingModoptions.lua") then
-		modoptions = VFS.Include(LUA_DIRNAME .. "configs/testingModoptions.lua")
-	end
-	self:_OnSetModOptions(modoptions)
+	self:_OnSetModOptions({})
 
 	return self
 end

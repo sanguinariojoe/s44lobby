@@ -16,6 +16,7 @@ local components = {
     "lobby.lua",
     "main.lua",
     "settings.lua",
+    "single_player.lua",
     "postprocess.lua",
     "wiki.lua",
 }
@@ -30,6 +31,10 @@ WG.MENUOPTS = {
     wiki_unit = "gerpanzeriii",
     games = {"Spring: 1944."},
     show_all_games = false,
+    single_player = {
+        game = "Spring: 1944 $VERSION",
+        map = "1944_Moro_River_V1",
+    },
 }
 
 function widget:Initialize()
@@ -68,6 +73,9 @@ function widget:Initialize()
         })
     end
     -- Setup everything
+    local single_player = Chili.SinglePlayerWindow:New({
+        parent = Screen0,
+    })
     local lobby = Chili.LobbyWindow:New({
         parent = Screen0,
     })
@@ -76,7 +84,7 @@ function widget:Initialize()
     }, postprocess)
     local main = Chili.MainWindow:New({
         parent = Screen0,
-    }, lobby, settings, wiki)
+    }, single_player, lobby, settings, wiki)
     -- Fire up main window
     main:Show()
 
@@ -96,7 +104,8 @@ function widget:GetConfigData()
         channels        = WG.MENUOPTS.channels,
         wiki_unit       = WG.MENUOPTS.wiki_unit,
         games           = WG.MENUOPTS.games,
-        show_all_games  = WG.MENUOPTS.show_all_games
+        show_all_games  = WG.MENUOPTS.show_all_games,
+        single_player   = WG.MENUOPTS.single_player,
     }
 end
 
@@ -109,6 +118,7 @@ function widget:SetConfigData(data)
     WG.MENUOPTS.wiki_unit       = data.wiki_unit or WG.MENUOPTS.wiki_unit
     WG.MENUOPTS.games           = data.games or WG.MENUOPTS.games
     WG.MENUOPTS.show_all_games  = data.show_all_games or WG.MENUOPTS.show_all_games
+    WG.MENUOPTS.single_player   = data.single_player or WG.MENUOPTS.single_player
 end
 
 function widget:Shutdown()
