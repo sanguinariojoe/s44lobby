@@ -53,7 +53,7 @@ function widget:Initialize()
 
     local postprocess = nil
     local wiki = nil
-    if LUA_NAME == "LuaUI" then
+    if LUA_NAME ~= "LuaMenu" then
         -- Components just available in LuaUI, not in LuaMenu
         postprocess = Chili.PostprocessWindow:New({
             parent = Screen0,
@@ -80,7 +80,7 @@ function widget:Initialize()
     -- Fire up main window
     main:Show()
 
-    if LUA_NAME == "LuaUI" then
+    if LUA_NAME ~= "LuaMenu" then
         widgetHandler:AddAction("s44esckey", Chili.ExecuteEscAction)
         Spring.SendCommands({"unbindkeyset esc"})
         Spring.SendCommands("bind esc s44esckey")
@@ -112,7 +112,7 @@ function widget:SetConfigData(data)
 end
 
 function widget:Shutdown()
-    if LUA_NAME == "LuaUI" then
+    if LUA_NAME ~= "LuaMenu" then
         widgetHandler:RemoveAction("s44esckey")
         Spring.SendCommands("unbind esc s44esckey")
     end
