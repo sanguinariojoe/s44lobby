@@ -209,7 +209,7 @@ local function _decompile_map(map, folder)
     if Spring.CreateDir(folder) == false then
         Spring.Log("GetMinimap", LOG.ERROR,
                    "Failure creating the folder '" .. folder .. "'")
-        return false
+        return nil
     end
 
     local mapfile = VFS.GetArchiveInfo(map).mapfile
@@ -218,7 +218,7 @@ local function _decompile_map(map, folder)
     local hdr = _read_header(data)
     _extract_minimap(hdr, data, folder)
 
-    return true
+    return hdr
 end
 
 local function _decompile_map_wrapper(map, folder)
@@ -226,9 +226,9 @@ local function _decompile_map_wrapper(map, folder)
     -- simply mapping and unmapping the resources
     -- return VFS.UseArchive(map, _decompile_map, map, folder)
     VFS.MapArchive(map)
-    local success = _decompile_map(map, folder)
+    local hdr = _decompile_map(map, folder)
     VFS.UnmapArchive(map)
-    return success
+    return hdr
 end
 
 function GetMinimap(map, folder)
@@ -240,18 +240,13 @@ function GetMinimap(map, folder)
         return false
     end
 
-    local success = _decompile_map_wrapper(mapname, folder)
-    if not success then
-        if success == nil then
-            Spring.Log("GetMinimap", LOG.ERROR,
-                       "Failure using '" .. map .. "' archive")
-        else
-            Spring.Log("GetMinimap", LOG.ERROR,
-                       "Failure excuting _decompile_map()")            
-        end
+    local hdr = _decompile_map_wrapper(mapname, folder)
+    if not hdr then
+        Spring.Log("GetMinimap", LOG.ERROR,
+                    "Failure excuting _decompile_map()")            
     end
     
-    return success
+    return hdr
 end
 
 function GetMinimapCmd(cmd, optLine)
@@ -275,7 +270,8 @@ function GetMinimapCmd(cmd, optLine)
         return false
     end
 
-    return GetMinimap(map, folder)
+    local hdr = GetMinimap(map, folder)
+    return hdr ~= nil
 end
 
 function widget:Initialize()

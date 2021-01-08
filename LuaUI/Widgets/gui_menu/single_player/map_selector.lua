@@ -28,9 +28,10 @@ local function _AddMap(parent, mapName, y)
 
     local minimap_folder = MINIMAPS_FOLDER .. mapName
     local minimap_file = minimap_folder .. "/minimap.png"
-    if not VFS.FileExists(minimap_file) then
-        WG.GetMinimap(mapName, minimap_folder)
-    end
+    -- Let the widget:Update() take care on this
+    -- if not VFS.FileExists(minimap_file) then
+    --     WG.GetMinimap(mapName, minimap_folder)
+    -- end
 
     w = parent.width
     local button = Chili.Button:New {

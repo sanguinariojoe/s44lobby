@@ -20,7 +20,8 @@ local components = {
     "postprocess.lua",
     "wiki.lua",
 }
-
+local last_map, parsed_maps = 0, {}
+MINIMAPS_FOLDER = "s44lobby/minimaps/"
 WG.MENUOPTS = {
     login_tab = "Register",
     login_user = "",
@@ -34,6 +35,14 @@ WG.MENUOPTS = {
     single_player = {
         game = "Spring: 1944 $VERSION",
         map = "1944_Moro_River_V1",
+        spectate = false,
+        players = {
+            [1] = {
+                place = 1,
+                side = "Random Team (GM)",
+                ai = nil,
+            },
+        },
     },
 }
 
@@ -92,6 +101,22 @@ function widget:Initialize()
         widgetHandler:AddAction("s44esckey", Chili.ExecuteEscAction)
         Spring.SendCommands({"unbindkeyset esc"})
         Spring.SendCommands("bind esc s44esckey")
+    end
+end
+
+function widget:Update()
+    -- We are parsing a map each frame
+    local maps = VFS.GetMaps()
+    for _, m in ipairs(maps) do
+        if not parsed_maps[m] == nil then
+            parsed_maps[m] = true
+            local minimap_folder = MINIMAPS_FOLDER .. m
+            local minimap_file = minimap_folder .. "/minimap.png"
+            if not VFS.FileExists(minimap_file) then
+                WG.GetMinimap(m, minimap_folder)
+            end
+            return
+        end
     end
 end
 
