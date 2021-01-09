@@ -36,6 +36,7 @@ WG.MENUOPTS = {
         game = "Spring: 1944 $VERSION",
         map = "1944_Moro_River_V1",
         spectate = false,
+        n_players = 1,
         players = {
             [1] = {
                 place = 1,
