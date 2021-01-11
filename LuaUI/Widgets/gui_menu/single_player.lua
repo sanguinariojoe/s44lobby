@@ -12,6 +12,7 @@ local available_places, player_objs = {}, {}
 
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/single_player/map_selector.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/single_player/player.lua")
 
 --//=============================================================================
 
@@ -43,110 +44,76 @@ local function _findLast(txt, str)
     if i==nil then return nil else return i-1 end
 end
 
-local function _setPlayerPlace(playerID)
-    if not WG.MENUOPTS.single_player.players[playerID] then
-        Spring.Log("Single Player", "Error", "Cannot find place for unknown player")
-        return nil
+local function _playerPlace(playerID)
+    local place = nil
+    if player_objs[playerID] then
+        place = player_objs[playerID].place
     end
-    local place = WG.MENUOPTS.single_player.players[playerID].place
     if place then
         if type(place) == "number" then
             available_places[place].player = playerID
-            return available_places[place].x, available_places[place].z
+            return available_places[place].x, available_places[place].z, place
         else
-            return place.x, place.z
+            return place.x, place.z, place
         end
     else
-        for _, place in ipairs(available_places) do
+        for i, place in ipairs(available_places) do
             if not place.player then
-                WG.MENUOPTS.single_player.players[playerID].place = place
                 place.player = playerID
-                return place.x, place.z
+                return place.x, place.z, i
             end
         end
-        WG.MENUOPTS.single_player.players[playerID].place = {x = 0.5, z = 0.5}
-        return 0.5, 0.5
+        return 0.5, 0.5, {x = 0.5, z = 0.5}
     end
-end
-
-local function _newPlayerID()
-    local playerID = 2
-    while WG.MENUOPTS.single_player.players[playerID] do
-        playerID = playerID + 1
-    end
-    return playerID
 end
 
 local function _addPlayer(parent, playerID)
-    Spring.Echo("_addPlayer", playerID)
-    playerID = playerID or _newPlayerID()
-    Spring.Echo("  _addPlayer", playerID)
-
-    if WG.MENUOPTS.single_player.players[playerID] then
+    if player_objs[playerID] then
         Spring.Log("Single Player", "Warning", "Trying to add an already existing player")
         return nil
     end
 
-    Spring.Echo("  _addPlayer", playerID)
-
-    WG.MENUOPTS.single_player.players[playerID] = {
-        side = "Random Team (GM)",
-        ai = playerID ~= 1 and "C.R.A.I.G." or nil,
-        place = nil}
-    local x, z = _setPlayerPlace(playerID)
-    Spring.Echo("  _addPlayer", x, z)
-    player_objs[playerID] = Chili.Window:New {
+    local ai = "C.R.A.I.G."
+    if playerID == 1 and not WG.MENUOPTS.single_player.spectate then
+        ai = nil
+    end
+    local x, z, place = _playerPlace(playerID)
+    Spring.Echo("_addPlayer", parent, x, z, place, ai)
+    player_objs[playerID] = PlayerWindow:New {
         parent = parent,
-        x = tostring(math.floor(100 * math.max(0, x - 0.02))) .. "%",
-        y = tostring(math.floor(100 * math.max(0, z - 0.02))) .. "%",
-        width = '4%',
-        height = '4%',
-        resizable = false,
-        draggable = true,
+        playerID = playerID,
+        x = x,
+        y = z,
+        place = place,
+        ai = ai,
     }
-
-    Spring.Echo("  ***_addPlayer", x, z)
 
     return playerID
 end
 
-local function _resetPlayer(parent, playerID)
+local function _resetPlayer(playerID)
     Spring.Echo("_resetPlayer", playerID)
-    if not WG.MENUOPTS.single_player.players[playerID] then
+    if not player_objs[playerID] then
         Spring.Log("Single Player", "Warning", "Trying to reset an unknown player")
         return
     end
 
-    Spring.Echo("  _resetPlayer", playerID, player_objs[playerID])
-    local x, z = _setPlayerPlace(playerID)
-    if not player_objs[playerID] then
-        player_objs[playerID] = Chili.Window:New {
-            parent = parent,
-            x = tostring(math.floor(100 * math.max(0, x - 0.02))) .. "%",
-            y = tostring(math.floor(100 * math.max(0, z - 0.02))) .. "%",
-            width = '4%',
-            height = '4%',
-            resizable = false,
-            draggable = true,
-        }
-    else
-        player_objs[playerID]:SetPositionRelative(x - 0.02, z - 0.02, nil, nil)
-    end
-    Spring.Echo("  ***_resetPlayer", x, z)
+    local x, z, place = _playerPlace(playerID)
+    Spring.Echo("  _resetPlayer", x, z, place)
+    player_objs[playerID]:OnPlaceUpdate(x, z)
 end
 
 local function _removePlayer(playerID)
-    if not WG.MENUOPTS.single_player.players[playerID] then
+    if not player_objs[playerID] then
         Spring.Log("Single Player", "Warning", "Trying to remove an unknown player")
         return
     end
-    local place = WG.MENUOPTS.single_player.players[playerID].place
+    local place = player_objs[playerID].place
     if type(place) == "number" then
-        WG.MENUOPTS.single_player.players[playerID] = nil
         available_places[place].player = nil
-        player_objs[playerID]:Dispose()
-        player_objs[playerID] = nil
     end
+    player_objs[playerID]:Dispose()
+    player_objs[playerID] = nil
 end
 
 local function ParseSMD(map)
@@ -201,6 +168,20 @@ local function MapInfo(map)
     return info
 end
 
+local function SetNPlayers(obj, n_players)
+    WG.MENUOPTS.single_player.n_players = n_players
+    for i = 1, n_players do
+        if player_objs[i] then
+            _resetPlayer(i)
+        else
+            _addPlayer(obj.map, i)
+        end
+    end
+    for i = #WG.MENUOPTS.single_player.players, n_players + 1, -1 do
+        _removePlayer(i)
+    end
+end
+
 local function SetMap(obj)
     local lobby = WG.LibLobby.localLobby
     local battle = lobby:GetBattle(lobby:GetMyBattleID())
@@ -208,7 +189,7 @@ local function SetMap(obj)
     local minimap_file = minimap_folder .. "/minimap.png"
     -- We are invariably executing this, because we need the header
     local hdr = WG.GetMinimap(battle.mapName, minimap_folder)
-    obj.map.file = minimap_file
+    obj.mapimg.file = minimap_file
     obj.select_map:SetCaption(battle.mapName)
     WG.MENUOPTS.single_player.map = battle.mapName
 
@@ -218,37 +199,25 @@ local function SetMap(obj)
         return
     end
 
-    obj.map:ClearChildren()
+    obj.mapimg:ClearChildren()
     available_places = {}
     for i, t in pairs(info.teams) do
         local x, z = _global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
         available_places[#available_places + 1] = {x = x, z = z, player = nil}
 
+        --[[
         Chili.Image:New {
-            parent = obj.map,
+            parent = obj.mapimg,
             x = tostring(math.floor(100 * math.max(0, x - 0.015))) .. "%",
             y = tostring(math.floor(100 * math.max(0, z - 0.015))) .. "%",
             width = "3%",
             height = "3%",
             file = ICONS_FOLDER .. "gui/team_place.png",
         }
+        --]]
     end
 
-    -- Reset players
-    local i, n_players = 1, WG.MENUOPTS.single_player.n_players
-    local lastPlayerID = 1
-    for playerID, data in pairs(WG.MENUOPTS.single_player.players) do
-        if i <= n_players then
-            _resetPlayer(obj.map, playerID)
-        else
-            _removePlayer(playerID)
-        end
-        i = i + 1
-    end
-
-    for j = i, n_players do
-        _addPlayer(obj.map)
-    end
+    SetNPlayers(obj, WG.MENUOPTS.single_player.n_players)
 end
 
 local function OnStart(self)
@@ -264,17 +233,18 @@ local function OnMapSelect(self)
 end
 
 local function OnSpectator(self, value)
-    if not value and WG.MENUOPTS.single_player.spectate then
-        _addPlayer(self.parent.map, 1)
-    elseif value and not WG.MENUOPTS.single_player.spectate then
-        _removePlayer(1)
+    if not value then
+        WG.MENUOPTS.single_player.players[1]:SetAI(nil)
+    else
+        WG.MENUOPTS.single_player.players[1]:SetAI("C.R.A.I.G.")
     end
     WG.MENUOPTS.single_player.spectate = value
 end
 
 local function OnNPlayers(self, value, old_value)
     self.parent.n_players_label:SetCaption(tostring(value))
-    WG.MENUOPTS.single_player.n_players = value
+    -- Why 3 levels of parenting??
+    SetNPlayers(self.parent.parent.parent, value)
 end
 
 function SinglePlayerWindow:New(obj)
@@ -296,12 +266,26 @@ function SinglePlayerWindow:New(obj)
     obj.maps_selector:Hide()
 
     -- Map stuff
-    obj.map = Chili.Image:New {
+    obj.map = Chili.Window:New {
         parent = obj,
         x = '0%',
         y = '0%',
         width = '50%',
         height = '90%',
+        padding = {0, 0, 0, 0},
+        margin = {0, 0, 0, 0},
+        resizable = false,
+        draggable = false,
+        TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+    }
+    obj.mapimg = Chili.Image:New {
+        parent = obj.map,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '100%',
+        padding = {0, 0, 0, 0},
+        margin = {0, 0, 0, 0},
         file = ICONS_FOLDER .. "download_icon.png",
     }
     obj.select_map = Chili.Button:New {
@@ -360,8 +344,8 @@ function SinglePlayerWindow:New(obj)
         boxalign = "left",
         checked = WG.MENUOPTS.single_player.spectate,
         parent = obj.opts_panel,
-        OnChange = { OnSpectator, },
     }
+    spectate.OnChange = { OnSpectator, }
     y = label.height
 
     obj.opts_panel.n_players_label = Chili.Label:New {
@@ -375,13 +359,13 @@ function SinglePlayerWindow:New(obj)
         y = y,
         width = "90%",
         height = obj.opts_panel.n_players_label.height - 5,
-        value = 1,
+        value = WG.MENUOPTS.single_player.n_players,
         min   = 1,
         max   = 6,
         step  = 1,
         parent = obj.opts_panel,
-        OnChange = { OnNPlayers, },
     }
+    obj.opts_panel.n_players.OnChange = { OnNPlayers, }
     y = obj.opts_panel.n_players_label.height
 
     -- Buttons
