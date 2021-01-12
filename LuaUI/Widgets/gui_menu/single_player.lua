@@ -234,9 +234,9 @@ end
 
 local function OnSpectator(self, value)
     if not value then
-        WG.MENUOPTS.single_player.players[1]:SetAI(nil)
+        player_objs[1]:SetAI(nil)
     else
-        WG.MENUOPTS.single_player.players[1]:SetAI("C.R.A.I.G.")
+        player_objs[1]:SetAI("C.R.A.I.G.")
     end
     WG.MENUOPTS.single_player.spectate = value
 end

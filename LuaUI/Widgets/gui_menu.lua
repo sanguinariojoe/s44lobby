@@ -38,10 +38,11 @@ WG.MENUOPTS = {
         spectate = false,
         n_players = 1,
         players = {
-            [1] = {
+            {
                 place = 1,
                 side = "Random Team (GM)",
                 ai = nil,
+                ally = 1,
             },
         },
     },

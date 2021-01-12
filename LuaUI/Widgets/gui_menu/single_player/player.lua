@@ -23,8 +23,17 @@ function Destroy(self)
     WG.MENUOPTS.single_player.players[self.playerID] = nil
 end
 
+function Resized(self)
+    local fontsize = Chili.OptimumFontSize(self.font,
+                                           "Ally:  1 ",
+                                           self.width - 2,
+                                           0.5 * self.height - 2) - 1
+    self.ally_label.font.size = math.max(4, fontsize)
+    self.ally_button.font.size = math.max(4, fontsize)
+    self.ally_label:UpdateLayout()
+end
+
 function ChangeSide(self)
-    Spring.Echo("ChangeSide...")
     local side_index = 0
     for i, side in ipairs(SIDEDATA) do
         if string.lower(side) == string.lower(self.parent.side) then
@@ -33,13 +42,17 @@ function ChangeSide(self)
         end
     end
 
-    Spring.Echo("    ", side_index)
     side_index = (side_index % #SIDEDATA) + 1
     local side = SIDEDATA[side_index]
-    Spring.Echo("    ", side_index)
     self.parent.side = side
-    Spring.Echo("    ", self.parent.side)
     self.img.file = SIDEPICS_FOLDER .. side .. ".png",
+    self.parent:SaveData()
+end
+
+function ChangeAlly(self)
+    local n_players = WG.MENUOPTS.single_player.n_players
+    self.parent.ally = self.parent.ally % n_players + 1
+    self.parent.ally_button:SetCaption(tostring(self.parent.ally))
     self.parent:SaveData()
 end
 
@@ -52,6 +65,13 @@ function PlayerWindow:New(obj)
             obj.side = SIDEDATA[1]
         end
     end
+    if not obj.ally then
+        if WG.MENUOPTS.single_player.players[obj.playerID] then
+            obj.ally = WG.MENUOPTS.single_player.players[obj.playerID].ally
+        else
+            obj.ally = obj.playerID
+        end
+    end
     obj.x = tostring(math.floor(100 * math.max(0, obj.x - 0.02))) .. "%"
     obj.y = tostring(math.floor(100 * math.max(0, obj.y - 0.02))) .. "%"
     obj.width, obj.height = '4%', '4%'
@@ -59,7 +79,6 @@ function PlayerWindow:New(obj)
     obj.draggable = true
     obj.margin = {0, 0, 0, 0}
     obj.padding = {1, 1, 1, 1}
-    obj.OnDispose = { Destroy, }
 
     obj = PlayerWindow.inherited.New(self, obj)
 
@@ -92,8 +111,35 @@ function PlayerWindow:New(obj)
         file = SIDEPICS_FOLDER .. obj.side .. ".png",
     }
 
+    obj.ally_label = Chili.Label:New {
+        parent = obj,
+        x = "0%",
+        y = "50%",
+        width = "50%",
+        height = "50%",
+        caption = "Ally: ",
+        valign = "center",
+    }
+
+    obj.ally_button = Chili.Button:New {
+        parent = obj,
+        x = "50%",
+        y = "50%",
+        width = "50%",
+        height = "50%",
+        caption = tostring(obj.ally),
+        padding = {1, 1, 1, 1},
+        TileImageBK = ICONS_FOLDER .. "gui/s44_button_alt_bk.png",
+        TileImageFG = ICONS_FOLDER .. "gui/s44_button_alt_fg.png",
+        OnClick = { ChangeAlly, },
+    }
+
+    obj.OnDispose = { Destroy, }
+    obj.OnResize = { Resized, }
+
     obj:SaveData()
     obj:SetAI(obj.ai)
+    Resized(obj)
 
     return obj
 end
@@ -123,10 +169,12 @@ function PlayerWindow:SaveData()
             place = self.place,
             side = self.side,
             ai = self.ai,
+            ally = self.ally,
         }
     else
         WG.MENUOPTS.single_player.players[playerID].place = self.place
         WG.MENUOPTS.single_player.players[playerID].side = self.side
         WG.MENUOPTS.single_player.players[playerID].ai = self.ai
+        WG.MENUOPTS.single_player.players[playerID].ally = self.ally
     end
 end
