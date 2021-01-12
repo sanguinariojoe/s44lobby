@@ -33,6 +33,11 @@ function Resized(self)
     self.ally_label:UpdateLayout()
 end
 
+function Moved(self, x, y)
+    WG.MENUOPTS.single_player.players[self.playerID].place = {x = x, z = y}
+    self:SetPosBounds()
+end
+
 function ChangeSide(self)
     local side_index = 0
     for i, side in ipairs(SIDEDATA) do
@@ -72,6 +77,7 @@ function PlayerWindow:New(obj)
             obj.ally = obj.playerID
         end
     end
+    obj.bounds = {0, 0, 1, 1}
     obj.x = tostring(math.floor(100 * math.max(0, obj.x - 0.02))) .. "%"
     obj.y = tostring(math.floor(100 * math.max(0, obj.y - 0.02))) .. "%"
     obj.width, obj.height = '4%', '4%'
@@ -136,6 +142,11 @@ function PlayerWindow:New(obj)
 
     obj.OnDispose = { Destroy, }
     obj.OnResize = { Resized, }
+    if not obj.OnMove then
+        obj.OnMove = { Moved, }
+    else
+        table.insert(obj.OnMove, 1, Moved)
+    end
 
     obj:SaveData()
     obj:SetAI(obj.ai)
@@ -150,6 +161,45 @@ function PlayerWindow:OnPlaceUpdate(x, y)
         tostring(math.floor(100 * math.max(0, y - 0.02))) .. "%",
         nil, nil)
     self.place = WG.MENUOPTS.single_player.players[self.playerID].place
+end
+
+function PlayerWindow:SetPosBounds(bounds)
+    if bounds then
+        self.bounds = bounds
+    else
+        bounds = self.bounds
+    end
+
+    if type(WG.MENUOPTS.single_player.players[self.playerID].place) == "number" then
+        return
+    end
+
+    local x = (self.x + 0.5 * self.width) / self.parent.width
+    local y = (self.y + 0.5 * self.height) / self.parent.height
+    local new_x, new_y = nil, nil
+    if x < bounds[1] then
+        new_x = bounds[1]
+    elseif x > bounds[3] then
+        new_x = bounds[3]
+    end
+    if y < bounds[2] then
+        new_y = bounds[2]
+    elseif y > bounds[4] then
+        new_y = bounds[4]
+    end
+    if new_x then
+        WG.MENUOPTS.single_player.players[self.playerID].place.x = new_x
+        self:SetPosRelative(
+            tostring(math.floor(100 * math.max(0, new_x - 0.02))) .. "%",
+            nil)
+    end
+    if new_y then
+        WG.MENUOPTS.single_player.players[self.playerID].place.y = new_y
+        self:SetPosRelative(
+            nil,
+            tostring(math.floor(100 * math.max(0, new_y - 0.02))) .. "%")
+    end
+
 end
 
 function PlayerWindow:SetAI(ai)

@@ -51,10 +51,14 @@ local function _playerPlace(playerID)
     end
     if place then
         if type(place) == "number" then
+            if not available_places[place] then
+                -- We have changed the map, and the place is not available anymore
+                return 0.5, 0.5, {x = 0.5, z = 0.5}
+            end
             available_places[place].player = playerID
             return available_places[place].x, available_places[place].z, place
         else
-            return place.x, place.z, place
+            return place.x, place.z, {x = place.x, z = place.z}
         end
     else
         for i, place in ipairs(available_places) do
@@ -78,7 +82,6 @@ local function _addPlayer(parent, playerID)
         ai = nil
     end
     local x, z, place = _playerPlace(playerID)
-    Spring.Echo("_addPlayer", parent, x, z, place, ai)
     player_objs[playerID] = PlayerWindow:New {
         parent = parent,
         playerID = playerID,
@@ -92,15 +95,14 @@ local function _addPlayer(parent, playerID)
 end
 
 local function _resetPlayer(playerID)
-    Spring.Echo("_resetPlayer", playerID)
     if not player_objs[playerID] then
         Spring.Log("Single Player", "Warning", "Trying to reset an unknown player")
         return
     end
 
     local x, z, place = _playerPlace(playerID)
-    Spring.Echo("  _resetPlayer", x, z, place)
     player_objs[playerID]:OnPlaceUpdate(x, z)
+    player_objs[playerID]:Show()
 end
 
 local function _removePlayer(playerID)
@@ -112,8 +114,7 @@ local function _removePlayer(playerID)
     if type(place) == "number" then
         available_places[place].player = nil
     end
-    player_objs[playerID]:Dispose()
-    player_objs[playerID] = nil
+    player_objs[playerID]:Hide()
 end
 
 local function ParseSMD(map)
@@ -177,7 +178,7 @@ local function SetNPlayers(obj, n_players)
             _addPlayer(obj.map, i)
         end
     end
-    for i = #WG.MENUOPTS.single_player.players, n_players + 1, -1 do
+    for i = #player_objs, n_players + 1, -1 do
         _removePlayer(i)
     end
 end
@@ -197,27 +198,40 @@ local function SetMap(obj)
     if not info then
         Spring.Log("Single Player", "Warning", "No info can be found for map '" .. battle.mapName .. "'")
         return
+    else
+        obj.mapimg:ClearChildren()
+        available_places = {}
+        for i, t in pairs(info.teams) do
+            if t.startPos then
+                local x, z = _global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
+                available_places[#available_places + 1] = {x = x, z = z, player = nil}
+                Chili.Image:New {
+                    parent = obj.mapimg,
+                    x = tostring(math.floor(100 * math.max(0, x - 0.015))) .. "%",
+                    y = tostring(math.floor(100 * math.max(0, z - 0.015))) .. "%",
+                    width = "3%",
+                    height = "3%",
+                    file = ICONS_FOLDER .. "gui/team_place.png",
+                }
+            end
+        end
     end
 
-    obj.mapimg:ClearChildren()
-    available_places = {}
-    for i, t in pairs(info.teams) do
-        local x, z = _global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
-        available_places[#available_places + 1] = {x = x, z = z, player = nil}
-
-        --[[
-        Chili.Image:New {
-            parent = obj.mapimg,
-            x = tostring(math.floor(100 * math.max(0, x - 0.015))) .. "%",
-            y = tostring(math.floor(100 * math.max(0, z - 0.015))) .. "%",
-            width = "3%",
-            height = "3%",
-            file = ICONS_FOLDER .. "gui/team_place.png",
-        }
-        --]]
-    end
 
     SetNPlayers(obj, WG.MENUOPTS.single_player.n_players)
+
+    local relative_bounds
+    if hdr.mapx > hdr.mapy then
+        local f = hdr.mapy / hdr.mapx
+        relative_bounds = {0, 0.5 * (1 - f), 1.0, 1.0 - 0.5 * (1 - f)}
+    elseif hdr.mapx < hdr.mapy then
+        local f = hdr.mapx / hdr.mapy
+        relative_bounds = {0.5 * (1 - f), 0, 1.0 - 0.5 * (1 - f), 1.0}
+    end
+
+    for _, player_obj in ipairs(player_objs) do
+        player_obj:SetPosBounds()
+    end
 end
 
 local function OnStart(self)
@@ -332,10 +346,6 @@ function SinglePlayerWindow:New(obj)
         caption = "Number of players:",
         parent = obj.opts_panel,
     }
-    if WG.MENUOPTS.single_player.spectate then
-        -- Fix some eventual inconsistencies at development stage
-        WG.MENUOPTS.single_player.players[1] = nil
-    end
     local spectate = Chili.Checkbox:New {
         x = "53%",
         y = y,
