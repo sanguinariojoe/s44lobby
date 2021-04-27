@@ -175,9 +175,10 @@ local function SetNPlayers(obj, n_players)
         if player_objs[i] then
             _resetPlayer(i)
         else
-            _addPlayer(obj.map, i)
+            _addPlayer(obj.players, i)
         end
     end
+
     for i = #player_objs, n_players + 1, -1 do
         _removePlayer(i)
     end
@@ -217,8 +218,13 @@ local function SetMap(obj)
         end
     end
 
-
-    SetNPlayers(obj, WG.MENUOPTS.single_player.n_players)
+    local n_players = WG.MENUOPTS.single_player.n_players
+    Spring.Echo("SetNPlayers", n_players, obj.opts_panel.n_players.value)
+    SetNPlayers(obj, n_players)
+    if (obj.opts_panel.n_players.value ~= n_players) then
+        obj.opts_panel.n_players_label:SetCaption(tostring(n_players))
+        obj.opts_panel.n_players:SetValue(n_players)
+    end
 
     local relative_bounds
     if hdr.mapx > hdr.mapy then
@@ -302,6 +308,19 @@ function SinglePlayerWindow:New(obj)
         margin = {0, 0, 0, 0},
         file = ICONS_FOLDER .. "download_icon.png",
     }
+    obj.players = Chili.Window:New {
+        parent = obj.map,
+        x = '0%',
+        y = '0%',
+        width = '100%',
+        height = '100%',
+        padding = {0, 0, 0, 0},
+        margin = {0, 0, 0, 0},
+        resizable = false,
+        draggable = false,
+        TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+    }
+
     obj.select_map = Chili.Button:New {
         parent = obj,
         x = '0%',
@@ -361,7 +380,7 @@ function SinglePlayerWindow:New(obj)
     obj.opts_panel.n_players_label = Chili.Label:New {
         x = "93%",
         y = y,
-        caption = "1",
+        caption = tostring(WG.MENUOPTS.single_player.n_players),
         parent = obj.opts_panel,
     }
     obj.opts_panel.n_players = Chili.Trackbar:New {
