@@ -34,8 +34,11 @@ function Resized(self)
 end
 
 function Moved(self, x, y)
-    WG.MENUOPTS.single_player.players[self.playerID].place = {x = x, z = y}
+    WG.MENUOPTS.single_player.players[self.playerID].place = {
+        x = (x + 0.5 * self.width) / self.parent.width,
+        z = (y + 0.5 * self.height) / self.parent.height}
     self:SetPosBounds()
+    self.parent.SnapPosition(self)
 end
 
 function ChangeSide(self)
@@ -160,7 +163,6 @@ function PlayerWindow:OnPlaceUpdate(x, y)
         tostring(math.floor(100 * math.max(0, x - 0.02))) .. "%",
         tostring(math.floor(100 * math.max(0, y - 0.02))) .. "%",
         nil, nil)
-    self.place = WG.MENUOPTS.single_player.players[self.playerID].place
 end
 
 function PlayerWindow:SetPosBounds(bounds)
@@ -168,10 +170,6 @@ function PlayerWindow:SetPosBounds(bounds)
         self.bounds = bounds
     else
         bounds = self.bounds
-    end
-
-    if type(WG.MENUOPTS.single_player.players[self.playerID].place) == "number" then
-        return
     end
 
     local x = (self.x + 0.5 * self.width) / self.parent.width
@@ -194,7 +192,7 @@ function PlayerWindow:SetPosBounds(bounds)
             nil)
     end
     if new_y then
-        WG.MENUOPTS.single_player.players[self.playerID].place.y = new_y
+        WG.MENUOPTS.single_player.players[self.playerID].place.z = new_y
         self:SetPosRelative(
             nil,
             tostring(math.floor(100 * math.max(0, new_y - 0.02))) .. "%")

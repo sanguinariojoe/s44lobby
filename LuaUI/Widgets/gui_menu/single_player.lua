@@ -45,30 +45,14 @@ local function _findLast(txt, str)
 end
 
 local function _playerPlace(playerID)
-    local place = nil
-    if player_objs[playerID] then
-        place = player_objs[playerID].place
-    end
-    if place then
-        if type(place) == "number" then
-            if not available_places[place] then
-                -- We have changed the map, and the place is not available anymore
-                return 0.5, 0.5, {x = 0.5, z = 0.5}
-            end
-            available_places[place].player = playerID
-            return available_places[place].x, available_places[place].z, place
-        else
-            return place.x, place.z, {x = place.x, z = place.z}
+    for i, place in ipairs(available_places) do
+        if place.player == nil then
+            place.player = playerID
+            return place.x, place.z
         end
-    else
-        for i, place in ipairs(available_places) do
-            if not place.player then
-                place.player = playerID
-                return place.x, place.z, i
-            end
-        end
-        return 0.5, 0.5, {x = 0.5, z = 0.5}
     end
+    -- Set it in the center
+    return nil, nil
 end
 
 local function _addPlayer(parent, playerID)
@@ -81,13 +65,19 @@ local function _addPlayer(parent, playerID)
     if playerID == 1 and not WG.MENUOPTS.single_player.spectate then
         ai = nil
     end
-    local x, z, place = _playerPlace(playerID)
+    local x, z = _playerPlace(playerID)
+    if x == nil then
+        x = 0.5
+    end
+    if z == nil then
+        z = 0.5
+    end
+
     player_objs[playerID] = PlayerWindow:New {
         parent = parent,
         playerID = playerID,
         x = x,
         y = z,
-        place = place,
         ai = ai,
     }
 
@@ -100,8 +90,8 @@ local function _resetPlayer(playerID)
         return
     end
 
-    local x, z, place = _playerPlace(playerID)
-    player_objs[playerID]:OnPlaceUpdate(x, z)
+    player_objs[playerID]:SetPosBounds()
+    player_objs[playerID].parent:SnapPosition()
     player_objs[playerID]:Show()
 end
 
@@ -110,11 +100,40 @@ local function _removePlayer(playerID)
         Spring.Log("Single Player", "Warning", "Trying to remove an unknown player")
         return
     end
-    local place = player_objs[playerID].place
-    if type(place) == "number" then
-        available_places[place].player = nil
+    for i, place in ipairs(available_places) do
+        if place.player == playerID then
+            available_places[i].player = nil
+        end
     end
     player_objs[playerID]:Hide()
+end
+
+local function SnapPosition(player, r)
+    r = r or 0.02
+    local x = (player.x + 0.5 * player.width) / player.parent.width
+    local z = (player.y + 0.5 * player.height) / player.parent.height
+    for i, place in ipairs(available_places) do
+        if place.player == player.playerID then
+            available_places[i].player = nil
+        end
+    end
+    for i, place in ipairs(available_places) do
+        if place.player == nil then
+            dx = x - place.x
+            dz = z - place.z
+            if dx * dx + dz * dz < r * r then
+                available_places[i].player = player.playerID
+                x = place.x
+                z = place.z
+                WG.MENUOPTS.single_player.players[player.playerID].place.x = x
+                WG.MENUOPTS.single_player.players[player.playerID].place.z = z
+                player:SetPosRelative(
+                    tostring(math.floor(100 * math.max(0, x - 0.02))) .. "%",
+                    tostring(math.floor(100 * math.max(0, z - 0.02))) .. "%")
+                return
+            end
+        end
+    end
 end
 
 local function ParseSMD(map)
@@ -201,11 +220,15 @@ local function SetMap(obj)
         return
     else
         obj.mapimg:ClearChildren()
+        old_places = available_places
         available_places = {}
         for i, t in pairs(info.teams) do
             if t.startPos then
                 local x, z = _global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
                 available_places[#available_places + 1] = {x = x, z = z, player = nil}
+                if old_places[#available_places] then
+                    available_places[#available_places].player = old_places[#available_places].player
+                end
                 Chili.Image:New {
                     parent = obj.mapimg,
                     x = tostring(math.floor(100 * math.max(0, x - 0.015))) .. "%",
@@ -219,7 +242,6 @@ local function SetMap(obj)
     end
 
     local n_players = WG.MENUOPTS.single_player.n_players
-    Spring.Echo("SetNPlayers", n_players, obj.opts_panel.n_players.value)
     SetNPlayers(obj, n_players)
     if (obj.opts_panel.n_players.value ~= n_players) then
         obj.opts_panel.n_players_label:SetCaption(tostring(n_players))
@@ -233,10 +255,12 @@ local function SetMap(obj)
     elseif hdr.mapx < hdr.mapy then
         local f = hdr.mapx / hdr.mapy
         relative_bounds = {0.5 * (1 - f), 0, 1.0 - 0.5 * (1 - f), 1.0}
+    else
+        relative_bounds = {0, 0, 1, 1}
     end
 
     for _, player_obj in ipairs(player_objs) do
-        player_obj:SetPosBounds()
+        player_obj:SetPosBounds(relative_bounds)
     end
 end
 
@@ -320,6 +344,7 @@ function SinglePlayerWindow:New(obj)
         draggable = false,
         TileImage = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
     }
+    obj.players.SnapPosition = SnapPosition
 
     obj.select_map = Chili.Button:New {
         parent = obj,
