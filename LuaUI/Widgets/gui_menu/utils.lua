@@ -213,6 +213,34 @@ function ExecuteEscAction()
 end
 
 -- =============================================================================
+-- Map size utils
+-- =============================================================================
+function global2local(x, z, mapsize_x, mapsize_z)
+    local u, v = x / (8 * mapsize_x), z / (8 * mapsize_z)
+    if mapsize_x > mapsize_z then
+        local f = mapsize_z / mapsize_x
+        v = f * v + 0.5 * (1 - f)
+    elseif mapsize_x < mapsize_z then
+        local f = mapsize_x / mapsize_z
+        u = f * u + 0.5 * (1 - f)
+    end
+    return u, v
+end
+
+function local2global(u, v, mapsize_x, mapsize_z)
+    if mapsize_x > mapsize_z then
+        local f = mapsize_z / mapsize_x
+        v = f * (v - 0.5 * (1 - f))
+    elseif mapsize_x < mapsize_z then
+        local f = mapsize_x / mapsize_z
+        u = f * (u - 0.5 * (1 - f))
+    end
+    return u * 8 * mapsize_x, v * 8 * mapsize_z
+end
+
+
+
+-- =============================================================================
 -- Chobby great string utilities
 -- =============================================================================
 

@@ -16,29 +16,6 @@ VFS.Include("LuaUI/Widgets/gui_menu/single_player/player.lua")
 
 --//=============================================================================
 
-local function _global2local(x, z, mapsize_x, mapsize_z)
-    local u, v = x / (8 * mapsize_x), z / (8 * mapsize_z)
-    if mapsize_x > mapsize_z then
-        local f = mapsize_z / mapsize_x
-        v = f * v + 0.5 * (1 - f)
-    elseif mapsize_x < mapsize_z then
-        local f = mapsize_x / mapsize_z
-        u = f * u + 0.5 * (1 - f)
-    end
-    return u, v
-end
-
-local function _local2global(u, v, mapsize_x, mapsize_z)
-    if mapsize_x > mapsize_z then
-        local f = mapsize_z / mapsize_x
-        v = f * (v - 0.5 * (1 - f))
-    elseif mapsize_x < mapsize_z then
-        local f = mapsize_x / mapsize_z
-        u = f * (u - 0.5 * (1 - f))
-    end
-    return u * 8 * mapsize_x, v * 8 * mapsize_z
-end
-
 local function _findLast(txt, str)
     local i = txt:match(".*" .. str .. "()")
     if i==nil then return nil else return i-1 end
@@ -92,6 +69,7 @@ local function _resetPlayer(playerID)
 
     player_objs[playerID]:SetPosBounds()
     player_objs[playerID].parent:SnapPosition()
+    player_objs[playerID]:SetAI(player_objs[playerID].ai)
     player_objs[playerID]:Show()
 end
 
@@ -210,6 +188,8 @@ local function SetMap(obj)
     local minimap_file = minimap_folder .. "/minimap.png"
     -- We are invariably executing this, because we need the header
     local hdr = WG.GetMinimap(battle.mapName, minimap_folder)
+    Spring.Echo("****** SetMap ", hdr)
+    obj.players.maphdr = hdr
     obj.mapimg.file = minimap_file
     obj.select_map:SetCaption(battle.mapName)
     WG.MENUOPTS.single_player.map = battle.mapName
@@ -224,7 +204,7 @@ local function SetMap(obj)
         available_places = {}
         for i, t in pairs(info.teams) do
             if t.startPos then
-                local x, z = _global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
+                local x, z = global2local(t.startPos.x, t.startPos.z, hdr.mapx, hdr.mapy)
                 available_places[#available_places + 1] = {x = x, z = z, player = nil}
                 if old_places[#available_places] then
                     available_places[#available_places].player = old_places[#available_places].player
@@ -265,6 +245,7 @@ local function SetMap(obj)
 end
 
 local function OnStart(self)
+    WG.LibLobby.localLobby:StartBattle("Skirmish", "Player")
 end
 
 local function OnBack(self)

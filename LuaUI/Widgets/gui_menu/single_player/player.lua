@@ -54,6 +54,7 @@ function ChangeSide(self)
     local side = SIDEDATA[side_index]
     self.parent.side = side
     self.img.file = SIDEPICS_FOLDER .. side .. ".png",
+    self.parent:SetAI(self.parent.ai)
     self.parent:SaveData()
 end
 
@@ -61,6 +62,7 @@ function ChangeAlly(self)
     local n_players = WG.MENUOPTS.single_player.n_players
     self.parent.ally = self.parent.ally % n_players + 1
     self.parent.ally_button:SetCaption(tostring(self.parent.ally))
+    self.parent:SetAI(self.parent.ai)
     self.parent:SaveData()
 end
 
@@ -201,12 +203,43 @@ function PlayerWindow:SetPosBounds(bounds)
 end
 
 function PlayerWindow:SetAI(ai)
+    if ai ~= nil then
+        self.player_name = ai .. " - " .. tostring(self.playerID)
+    else
+        self.player_name = "Player - " .. tostring(self.playerID)
+    end
+    if self.ai ~= nil then
+        WG.LibLobby.localLobby:RemoveAi(self.player_name)
+    end
+
+    local x, z
+    if self.parent.maphdr ~= nil then
+        x, z = local2global(self.place.x, self.place.z, self.parent.maphdr.mapx, self.parent.maphdr.mapy)
+    end
+
+    status = {
+        isReady = 1,
+        teamNumber = self.playerID,
+        teamColor = {math.random(), math.random(), math.random()},
+        allyNumber = self.ally,
+        isSpectator = false,
+        sync = 1,
+        side = self.side,
+        StartPosX = x,
+        StartPosZ = z,
+    }
+
     self.ai = ai
     WG.MENUOPTS.single_player.players[self.playerID].ai = ai
     if ai == nil then
         self.player_icon.file = ICONS_FOLDER .. "gui/player.png"
+        WG.LibLobby.localLobby:SetBattleStatus(status)
     else
+        if self.playerID == 0 then
+            WG.LibLobby.localLobby:SetBattleStatus({isSpectator = true})
+        end
         self.player_icon.file = ICONS_FOLDER .. "gui/cpu.png"
+        WG.LibLobby.localLobby:AddAi(self.player_name, ai, "<not-versioned>", {}, status)
     end
 end
 
@@ -226,3 +259,4 @@ function PlayerWindow:SaveData()
         WG.MENUOPTS.single_player.players[playerID].ally = self.ally
     end
 end
+

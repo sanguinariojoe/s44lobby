@@ -20,7 +20,7 @@ function InterfaceSkirmish:WriteTable(key, value, tabs)
 	-- Then the rest (purely for aesthetics)
 	for k, v in pairs(value) do
 		if type(v) ~= 'table' then
-			str = str..tabs..'\t'..k..' = '..v..';\n'
+			str = str..tabs..'\t'..k..'='..v..';\n'
 		end
 	end
 
@@ -40,7 +40,7 @@ function InterfaceSkirmish:MakeScriptTXT(script)
 	-- Then the rest (purely for aesthetics)
 	for key, value in pairs(script) do
 		if type(value) ~= 'table' then
-			str = str..'\t'..key..' = '..value..';\n'
+			str = str..'\t'..key..'='..value..';\n'
 		end
 	end
 	str = str..'}'
@@ -92,7 +92,9 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 					TeamLeader = 0,
 					AllyTeam = data.allyNumber,
 					RgbColor = getTeamColor(userName),
-					Side = WG.Chobby.Configuration:GetSideById(data.side).name,
+					Side = data.side,
+					StartPosX = data.StartPosX,
+					StartPosZ = data.StartPosZ,
 				}
 				maxAllyTeamID = math.max(maxAllyTeamID, data.allyNumber)
 				teamCount = teamCount + 1
@@ -116,7 +118,9 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 						TeamLeader = playerCount,
 						AllyTeam = data.allyNumber,
 						RgbColor = getTeamColor(userName),
-						Side = WG.Chobby.Configuration:GetSideById(data.side).name,
+						Side = data.side,
+						StartPosX = data.StartPosX,
+						StartPosZ = data.StartPosZ,
 					}
 					teamCount = teamCount + 1
 					if friendsReplaceAI then
@@ -168,7 +172,9 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 					TeamLeader = 0,
 					AllyTeam = data.allyNumber,
 					RgbColor = getTeamColor(userName),
-					Side = WG.Chobby.Configuration:GetSideById(data.side).name,
+					Side = data.side,
+					StartPosX = data.StartPosX,
+					StartPosZ = data.StartPosZ,
 				}
 				maxAllyTeamID = math.max(maxAllyTeamID, data.allyNumber)
 
@@ -224,21 +230,23 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 	-- We shouldn't give special treatment for rapid tags, and just use them interchangabily with normal archives.
 	-- So we could just pass "rapid://tag:version" as gameName, while "tag:version" should be invalid.
 	-- The engine treats rapid dependencies just like normal archives and I see no reason we do otherwise.
+	--[[
 	if string.find(gameName, ":") and not string.find(gameName, "rapid://") then
 		gameName = "rapid://" .. gameName
 	end
+	--]]
 
 	local script = {
 		gametype = gameName,
-		hostip = "127.0.0.1",
-		hostport = hostPort or 0,
+		hostip = "",
+		hostport = hostPort or 8452,
 		ishost = 1,
 		mapname = mapName,
 		myplayername = playerName,
 		nohelperais = 0,
 		numplayers = playerCount,
 		numusers = playerCount + aiCount,
-		startpostype = 2,
+		startpostype = 3,
 		modoptions = self.modoptions,
 		GameStartDelay = 0,
 	}
@@ -264,6 +272,7 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 	--scriptFile:write(scriptTxt)
 	--scriptFile:close()
 
+	--[[
 	local Config = WG.Chobby.Configuration
 	if Config.multiplayerLaunchNewSpring then
 		if WG.WrapperLoopback and WG.WrapperLoopback.StartNewSpring and WG.SettingsWindow and WG.SettingsWindow.GetSettingsString then
@@ -276,6 +285,7 @@ function InterfaceSkirmish:_StartScript(gameName, mapName, playerName, friendLis
 			return
 		end
 	end
+	--]]
 
 	Spring.Reload(scriptTxt)
 end
@@ -416,15 +426,14 @@ end
 -- BEGIN Client commands
 -------------------------------------------------
 
-function InterfaceSkirmish:AddAi(aiName, aiLib, allyNumber, version, options)
+function InterfaceSkirmish:AddAi(aiName, aiLib, version, options, status)
 	self:super("AddAi", aiName, aiLib, allyNumber, version, options)
-	self:_OnAddAi(self:GetMyBattleID(), aiName, {
-		aiLib = aiLib,
-		allyNumber = allyNumber,
-		owner = self:GetMyUserName(),
-		aiVersion = version,
-		aiOptions = options,
-	})
+	status = status or {}
+	status.aiLib = aiLib
+	status.owner = self:GetMyUserName()
+	status.aiVersion = version
+	status.aiOptions = options
+	self:_OnAddAi(self:GetMyBattleID(), aiName, status)
 end
 
 function InterfaceSkirmish:SayBattle(message)
