@@ -13,6 +13,7 @@ local available_places, player_objs = {}, {}
 VFS.Include("LuaUI/Widgets/gui_menu/utils.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/single_player/map_selector.lua")
 VFS.Include("LuaUI/Widgets/gui_menu/single_player/player.lua")
+VFS.Include("LuaUI/Widgets/gui_menu/single_player/mod_options.lua")
 
 --//=============================================================================
 
@@ -188,7 +189,6 @@ local function SetMap(obj)
     local minimap_file = minimap_folder .. "/minimap.png"
     -- We are invariably executing this, because we need the header
     local hdr = WG.GetMinimap(battle.mapName, minimap_folder)
-    Spring.Echo("****** SetMap ", hdr)
     obj.players.maphdr = hdr
     obj.mapimg.file = minimap_file
     obj.select_map:SetCaption(battle.mapName)
@@ -358,8 +358,9 @@ function SinglePlayerWindow:New(obj)
         width = "100%",
         height = "100%",
         resizeItems = false,
-        TileImageBK = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
-        TileImageFG = "LuaUI/Widgets/gui_menu/rsrc/empty.png",
+        resizable = false,
+        draggable = false,
+        TileImage = "LuaUI/Widgets/chili/skins/s44/s44_window_opaque.png",
         parent = scroll,
     }
 
@@ -401,7 +402,15 @@ function SinglePlayerWindow:New(obj)
         parent = obj.opts_panel,
     }
     obj.opts_panel.n_players.OnChange = { OnNPlayers, }
-    y = obj.opts_panel.n_players_label.height
+    y = y + obj.opts_panel.n_players_label.height
+
+    obj.opts_panel.mod_options = ModOptionsWindow:New {
+        y = y,
+        parent = obj.opts_panel,
+    }
+    y = y + obj.opts_panel.mod_options.height
+    
+    obj.opts_panel:Resize(nil, y + 32)
 
     -- Buttons
     local back = Chili.Button:New {
